@@ -1,3 +1,9 @@
+"""
+Top level testbench
+
+This is mostly a stub for now
+"""
+
 # SPDX-FileCopyrightText: © 2024 Tiny Tapeout
 # SPDX-License-Identifier: MIT
 
