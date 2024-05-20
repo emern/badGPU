@@ -27,12 +27,6 @@ module tb_raster_core ();
   // Replace tt_um_example with your module name:
   tt_um_emern_raster_core user_project (
 
-      // TODO: Verify this part
-`ifdef GL_TEST
-      .VPWR(1'b1),
-      .VGND(1'b0),
-`endif
-
     .pixel_col(pixel_col),
     .pixel_row(pixel_row),
 

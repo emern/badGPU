@@ -14,8 +14,8 @@ from matplotlib import pyplot as plt
 
 # Enable saving sample images for visual inspection
 # Should be turned off for CI
-SAVE_IMAGE_OUTPUT = 1
-SAVED_IMAGE_PATH = 'image_artifacts/'
+SAVE_IMAGE_OUTPUT = 0
+SAVED_IMAGE_PATH = 'image_artifacts/rasterization/'
 
 
 def print_internal_state(dut):
@@ -66,6 +66,45 @@ def set_polygon(dut, v0, v1, v2):
     dut.v0_y.value = v0[1]
     dut.v1_y.value = v1[1]
     dut.v2_y.value = v2[1]
+
+
+async def draw_polygon_on_screen(dut, v0, v1, v2):
+    """
+    Draw a polygon on screen, check against ground truth algorithm
+    """
+
+    set_polygon(dut, v0, v1, v2)
+
+    gt_arr = np.zeros((480, 640))
+    gen_arr = np.zeros((480, 640))
+
+    # Loop over entire screen
+    for row in range(480):
+        for col in range(640):
+            # Generate ground truth
+            gt_arr[row, col] = should_pixel_be_rasterized(v0, v1, v2, col, row)
+
+            # Get rasterizer output
+            dut.pixel_col.value = col
+            dut.pixel_row.value = row
+
+            await Timer(40, units="ns")
+
+            gen_arr[row, col] = dut.rasterize.value
+
+            # Check rasterized output against ground truth
+            if (gen_arr[row, col] != gt_arr[row, col]):
+                print("Mismatch detected!")
+                print(col)
+                print(row)
+                print("Actual: ")
+                should_pixel_be_rasterized(v0, v1, v2, col, row, log=True)
+                print("Device output:")
+                print_internal_state(dut)
+                assert 1 == 0
+
+    # Return generated images
+    return (gt_arr, gen_arr)
 
 
 @cocotb.test()
@@ -128,6 +167,8 @@ async def test_small(dut):
 
     assert dut.rasterize.value == 0
 
+    dut._log.info("Passed")
+
 
 @cocotb.test()
 async def test_whole_screen(dut):
@@ -145,39 +186,119 @@ async def test_whole_screen(dut):
     v1 = [446, 412]
     v2 = [1, 1]
 
-    set_polygon(dut, v0, v1, v2)
-
-    gt_arr = np.zeros((480, 640))
-    gen_arr = np.zeros((480, 640))
-
-    # Loop over entire screen
-    for row in range(480):
-        for col in range(640):
-            # Generate ground truth
-            gt_arr[row, col] = should_pixel_be_rasterized(v0, v1, v2, col, row)
-
-            # Get rasterizer output
-            dut.pixel_col.value = col
-            dut.pixel_row.value = row
-
-            await Timer(40, units="ns")
-
-            gen_arr[row, col] = dut.rasterize.value
-
-            if (gen_arr[row, col] != gt_arr[row, col]):
-                print("Mismatch detected!")
-                print(col)
-                print(row)
-                print("Actual: ")
-                should_pixel_be_rasterized(v0, v1, v2, col, row, log=True)
-                print("Device output:")
-                print_internal_state(dut)
-                assert 1 == 0
-
+    gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
     if SAVE_IMAGE_OUTPUT == 1:
         plt.imsave(SAVED_IMAGE_PATH + 'gt_whole_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_whole_screen.png', gen_arr)
+    
+    dut._log.info("Passed")
 
 
+@cocotb.test()
+async def test_corner_top_left(dut):
+    """
+    Test large triangle on top left of screen
+    """
+
+    dut._log.info("Start")
+
+    # Reset input address
+    dut.pixel_col.value = 0
+    dut.pixel_row.value = 0
+
+    # Make large corner triangle
+    v0 = [640, 0]
+    v1 = [0, 480]
+    v2 = [0, 0]
+
+    gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
+
+    # Save rasterized images if desired
+    if SAVE_IMAGE_OUTPUT == 1:
+        plt.imsave(SAVED_IMAGE_PATH + 'gt_top_left_screen.png', gt_arr)
+        plt.imsave(SAVED_IMAGE_PATH + 'gen_top_left_screen.png', gen_arr)
+
+    dut._log.info("Passed")
+
+
+@cocotb.test()
+async def test_corner_top_right(dut):
+    """
+    Test large triangle on top right of screen
+    """
+
+    dut._log.info("Start")
+
+    # Reset input address
+    dut.pixel_col.value = 0
+    dut.pixel_row.value = 0
+
+    # Make large corner triangle
+    v0 = [640, 0]
+    v1 = [640, 480]
+    v2 = [0, 0]
+
+    gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
+
+    # Save rasterized images if desired
+    if SAVE_IMAGE_OUTPUT == 1:
+        plt.imsave(SAVED_IMAGE_PATH + 'gt_top_right_screen.png', gt_arr)
+        plt.imsave(SAVED_IMAGE_PATH + 'gen_top_right_screen.png', gen_arr)
+
+    dut._log.info("Passed")
+
+
+@cocotb.test()
+async def test_corner_bottom_right(dut):
+    """
+    Test large triangle on bottom right of screen
+    """
+
+    dut._log.info("Start")
+
+    # Reset input address
+    dut.pixel_col.value = 0
+    dut.pixel_row.value = 0
+
+    # Make large corner triangle
+    v0 = [640, 0]
+    v1 = [640, 480]
+    v2 = [0, 480]
+
+    gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
+
+    # Save rasterized images if desired
+    if SAVE_IMAGE_OUTPUT == 1:
+        plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_right_screen.png', gt_arr)
+        plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_right_screen.png', gen_arr)
+
+    dut._log.info("Passed")
+
+
+@cocotb.test()
+async def test_corner_bottom_left(dut):
+    """
+    Test large triangle on bottom left of screen
+    """
+
+    dut._log.info("Start")
+
+    # Reset input address
+    dut.pixel_col.value = 0
+    dut.pixel_row.value = 0
+
+    # Make large corner triangle
+    v0 = [640, 480]
+    v1 = [0, 480]
+    v2 = [0, 0]
+
+    gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
+
+    # Save rasterized images if desired
+    if SAVE_IMAGE_OUTPUT == 1:
+        plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_left_screen.png', gt_arr)
+        plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_left_screen.png', gen_arr)
+
+    dut._log.info("Passed")
