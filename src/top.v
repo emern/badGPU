@@ -15,10 +15,17 @@ module tt_um_emern_top (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
+  // Hook up reciprocal calc unit for testing
+  assign uio_out = test[7:0];
+  assign uio_oe  = {test2, test[14:8]};
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+  wire [22:0] test;
+  wire test2;
 
+  tt_um_emern_inverse reciprocal (
+    .determinant({uio_in[4:0], ui_in}),
+
+    .inv_det_negative(test2),
+    .inv_det(test)
+  );
 endmodule

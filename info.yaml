@@ -16,8 +16,10 @@ project:
   # List your project's source files here. Source files must be in ./src and you must list each source file separately, one per line:
   source_files:        
     - "top.v"
-    - "raster_core.v"
+    - "inverse.v"
     - "pixel_core.v"
+    - "raster_core.v"
+    - "ray_tracer_core.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:

@@ -5,7 +5,7 @@
 
 `default_nettype none
 
-// Determinant inverse fits in Q21.21
+// Determinant inverse fits in Q23.23
 `define QM 23
 `define QF 23
 
