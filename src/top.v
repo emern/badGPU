@@ -16,16 +16,33 @@ module tt_um_emern_top (
     input  wire       rst_n     // reset_n - low to reset
 );
   // Hook up reciprocal calc unit for testing
-  assign uio_out = test[7:0];
-  assign uio_oe  = {test2, test[14:8]};
+  assign uio_out = 8'd0;
+  assign uio_oe  = 8'd0;
+  assign uo_out = {7'b0000000, rasterize_out};
 
-  wire [22:0] test;
-  wire test2;
+  wire rasterize;
+  reg [7:0] d_in;
+  reg rasterize_out;
 
-  tt_um_emern_inverse reciprocal (
-    .determinant({uio_in[4:0], ui_in}),
+  tt_um_emern_raster_core e_raster_core (
+    .pixel_col({1'b1, d_in, 1'b0}),
+    .pixel_row({1'b0, uio_in}),
 
-    .inv_det_negative(test2),
-    .inv_det(test)
+    .v0_x({2'b11, d_in}),
+    .v1_x({2'b10, uio_in}),
+    .v2_x({d_in, 2'b10}),
+
+    .v0_y({1'b1, uio_in}),
+    .v1_y({d_in, 1'b0}),
+    .v2_y({uio_in, 1'b1}),
+
+    .rasterize(rasterize)
   );
+
+
+  always @(posedge clk) begin
+    d_in <= ui_in;
+    rasterize_out <= rasterize;
+  end
+
 endmodule
