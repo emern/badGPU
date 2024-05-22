@@ -11,10 +11,8 @@ import cocotb
 from cocotb.triggers import Timer
 import numpy as np
 from matplotlib import pyplot as plt
+from os import environ
 
-# Enable saving sample images for visual inspection
-# Should be turned off for CI
-SAVE_IMAGE_OUTPUT = 0
 SAVED_IMAGE_PATH = 'image_artifacts/rasterization/'
 
 
@@ -189,7 +187,7 @@ async def test_whole_screen(dut):
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_whole_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_whole_screen.png', gen_arr)
     
@@ -216,7 +214,7 @@ async def test_corner_top_left(dut):
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_top_left_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_top_left_screen.png', gen_arr)
 
@@ -243,7 +241,7 @@ async def test_corner_top_right(dut):
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_top_right_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_top_right_screen.png', gen_arr)
 
@@ -270,7 +268,7 @@ async def test_corner_bottom_right(dut):
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_right_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_right_screen.png', gen_arr)
 
@@ -297,7 +295,7 @@ async def test_corner_bottom_left(dut):
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
     # Save rasterized images if desired
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_left_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_left_screen.png', gen_arr)
 
