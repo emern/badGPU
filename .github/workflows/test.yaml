@@ -42,9 +42,9 @@ jobs:
         uses: test-summary/action@v2.3
         with:
           paths: |
-          "test/results.xml"
-          "test/results_pixel_core.xml"
-          "test/results_raster_core.xml"
+          test/results.xml
+          test/results_pixel_core.xml
+          test/results_raster_core.xml
         if: always()
 
       - name: upload vcd
