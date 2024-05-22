@@ -19,7 +19,6 @@ project:
     - "inverse.v"
     - "pixel_core.v"
     - "raster_core.v"
-    - "ray_tracer_core.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
