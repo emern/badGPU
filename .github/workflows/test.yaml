@@ -28,14 +28,10 @@ jobs:
           cd test
           make clean
           make all
-          # make will return success even if the test fails, so check for failure in the results.xml
-          ! grep failure results.xml
-          make pixel_core
-          # Run pixel core unit tests
-          ! grep failure results_pixel_core.xml
-          make raster_core
-          # Run raster core unit tests
-          ! grep failure results_raster_core.xml
+          # make will return success even if the test fails, so check for failure in all results files
+          ! grep failed results.xml
+          ! grep failed results_pixel_core.xml
+          ! grep failed results_raster_core.xml
 
 
       - name: Test Summary

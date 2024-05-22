@@ -1,8 +1,11 @@
 # Makefile to run all tests
 
 all:
-	rm -f -r sim_build/rtl
 	make -f Makefile.1
+	rm -f -r sim_build/rtl
+	make -f Makefile.2  SAVE_IMGS=False
+	rm -f -r sim_build/rtl
+	make -f Makefile.3  SAVE_IMGS=False
 
 clean:
 	rm -f -r sim_build/rtl
@@ -15,12 +18,12 @@ clean:
 # Unit tests for pixel core
 pixel_core:
 	rm -f -r sim_build/rtl
-	make -f Makefile.2
+	make -f Makefile.2 SAVE_IMGS=True
 
 # Unit tests for raster core
 raster_core:
 	rm -f -r sim_build/rtl
-	make -f Makefile.3
+	make -f Makefile.3 SAVE_IMGS=True
 
 # Unit tests for ray tracing core
 ray_trace:

@@ -10,8 +10,8 @@ from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, Timer
 import numpy as np
 from PIL import Image
+from os import environ
 
-SAVE_IMAGE_OUTPUT = 1
 SAVED_IMAGE_PATH = 'image_artifacts/pixel_core/'
 
 
@@ -248,7 +248,7 @@ async def test_multi_polygons(dut):
     set_polygon_b(dut, p_b)
     gen_arr = await draw_screen(dut)
 
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         gt_img = Image.fromarray(gt_arr, mode='RGB')
         gt_img.save(SAVED_IMAGE_PATH + 'gt_multi_poly_test.png')
 
@@ -301,7 +301,7 @@ async def test_empty_screen(dut):
     set_polygon_b(dut, p_b)
     gen_arr = await draw_screen(dut)
 
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         gt_img = Image.fromarray(gt_arr, mode='RGB')
         gt_img.save(SAVED_IMAGE_PATH + 'gt_empty_screen.png')
 
@@ -354,7 +354,7 @@ async def test_polygon_a(dut):
     set_polygon_b(dut, p_b)
     gen_arr = await draw_screen(dut)
 
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         gt_img = Image.fromarray(gt_arr, mode='RGB')
         gt_img.save(SAVED_IMAGE_PATH + 'gt_poly_a_test.png')
 
@@ -407,7 +407,7 @@ async def test_polygon_b(dut):
     set_polygon_b(dut, p_b)
     gen_arr = await draw_screen(dut)
 
-    if SAVE_IMAGE_OUTPUT == 1:
+    if environ['SAVE_IMGS'] == 'True':
         gt_img = Image.fromarray(gt_arr, mode='RGB')
         gt_img.save(SAVED_IMAGE_PATH + 'gt_poly_b_test.png')
 
