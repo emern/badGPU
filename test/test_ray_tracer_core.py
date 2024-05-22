@@ -209,69 +209,6 @@ async def draw_polygon_on_screen(dut, v0, v1, v2):
     return (gt_arr, gen_arr)
 
 
-# @cocotb.test()
-# async def test_small(dut):
-#     """
-#     Run smoke test on small triangle
-#     """
-#     dut._log.info("Start")
-
-#     # Reset inputs, output only valid if a valid set of unique vertices is given
-#     dut.pixel_col.value = 0
-#     dut.pixel_row.value = 0
-
-#     # Note: Order here on the vertices is important, the GPU frontend must arrange them in the proper order
-#     v0 = [1, 0]
-#     v1 = [0, 1]
-#     v2 = [0, 0]
-
-#     set_polygon(dut, v0, v1, v2)
-
-#     # Wait 1 clock cycle
-#     await Timer(40, units="ns")
-
-#     # [(1,0), (0,1), (0,0)] is a valid polygon to draw when the pixel is (0,0) -> Single point
-#     assert dut.rasterize.value == 1
-
-#     # Check all points on given triangle
-
-#     # (0, 1)
-#     dut.pixel_col.value = 0
-#     dut.pixel_row.value = 1
-
-#     await Timer(40, units="ns")
-
-#     assert dut.rasterize.value == 1
-
-#     # (1, 0)
-#     dut.pixel_col.value = 1
-#     dut.pixel_row.value = 0
-
-#     await Timer(40, units="ns")
-
-#     assert dut.rasterize.value == 1
-
-#     # Check points outside the triangle are not drawn
-
-#     # (1, 1)
-#     dut.pixel_col.value = 1
-#     dut.pixel_row.value = 1
-
-#     await Timer(40, units="ns")
-
-#     assert dut.rasterize.value == 0
-
-#     # (2, 1)
-#     dut.pixel_col.value = 2
-#     dut.pixel_row.value = 1
-
-#     await Timer(40, units="ns")
-
-#     assert dut.rasterize.value == 0
-
-#     dut._log.info("Passed")
-
-
 @cocotb.test()
 async def test_whole_screen(dut):
     """
