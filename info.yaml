@@ -20,6 +20,7 @@ project:
     - "pixel_core.v"
     - "raster_core.v"
     - "frontend.v"
+    - "vga.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
