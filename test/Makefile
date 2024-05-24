@@ -34,3 +34,8 @@ ray_trace:
 inverse:
 	rm -f -r sim_build/rtl
 	make -f Makefile.5
+
+# Unit tests for frontend
+frontend:
+	rm -f -r sim_build/rtl
+	make -f Makefile.6
