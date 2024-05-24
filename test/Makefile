@@ -13,6 +13,7 @@ clean:
 	rm -f results_inverse.xml
 	rm -f results_frontend.xml
 
+# Test job in CI should build all unit tests
 ci:
 	make -f Makefile.1
 	rm -f -r sim_build/rtl
@@ -21,6 +22,8 @@ ci:
 	make -f Makefile.3  SAVE_IMGS=False
 	rm -f -r sim_build/rtl
 	make -f Makefile.6
+	rm -f -r sim_build/rtl
+	make -f Makefile.7
 
 # Unit tests for pixel core
 pixel_core:
@@ -46,3 +49,8 @@ inverse:
 frontend:
 	rm -f -r sim_build/rtl
 	make -f Makefile.6
+
+# Unit tests for vga
+vga:
+	rm -f -r sim_build/rtl
+	make -f Makefile.7
