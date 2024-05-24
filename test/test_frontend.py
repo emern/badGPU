@@ -124,7 +124,6 @@ async def send_spi_cmd(dut, cmd: SPIcmd):
 
             # Reset MOSI and MISO to not screw up next transmission
             dut.mosi_in.value = 0
-            dut.miso_in.value = 0
 
             # Wait delay time
             await Timer(500, units='ns')
@@ -144,7 +143,6 @@ async def send_spi_cmd(dut, cmd: SPIcmd):
     dut.cs_in.value = 1
     # Reset MOSI and MISO to not screw up next transmission
     dut.mosi_in.value = 0
-    dut.miso_in.value = 0
 
 
 async def reset_dut(dut):
@@ -158,7 +156,6 @@ async def reset_dut(dut):
     dut.rst_n.value = 0
     dut.cs_in.value = 1
     dut.mosi_in.value = 0
-    dut.miso_in.value = 0
     dut.sck_in.value = 0
     dut.en_load.value = 0
 
