@@ -27,11 +27,12 @@ jobs:
         run: |
           cd test
           make clean
-          make all
+          make ci
           # make will return success even if the test fails, so check for failure in all results files
           ! grep failed results.xml
           ! grep failed results_pixel_core.xml
           ! grep failed results_raster_core.xml
+          ! grep failed results_frontend.xml
 
 
       - name: Test Summary
@@ -41,6 +42,7 @@ jobs:
             test/results.xml
             test/results_pixel_core.xml
             test/results_raster_core.xml
+            test/results_frontend.xml
         if: always()
 
       - name: upload vcd
@@ -55,4 +57,6 @@ jobs:
             test/tb_pixel_core.vcd
             test/results_raster_core.xml
             test/tb_raster_core.vcd
+            test/results_frontend.xml
+            test/tb_frontend.vcd
 

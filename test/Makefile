@@ -11,6 +11,7 @@ clean:
 	rm -f results_raster_core.xml
 	rm -f results_ray_tracer_core.xml
 	rm -f results_inverse.xml
+	rm -f results_frontend.xml
 
 ci:
 	make -f Makefile.1
