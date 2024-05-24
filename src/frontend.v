@@ -7,7 +7,7 @@
 
 `default_nettype none
 
-`define SPI_CMD_DEVICE_ID 8'h00
+`define SPI_CMD_DEVICE_ID 8'h00 // TODO:
 
 `define SPI_CMD_WRITE_POLY_A 8'h80
 `define SPI_CMD_CLEAR_POLY_A 8'h40
@@ -127,10 +127,6 @@ module tt_um_emern_frontend (
             assign spi_buf[i]=spi_buf_reversed[56-i-1];
         end
     endgenerate
-
-    // Write device ID: TODO
-    // CMD ID 0x0
-    wire spi_write_dev_id = (spi_counter == 6'b001000) && ~(spi_buf[7:0] & 8'b00000000);
 
     // First received byte is the cmd byte
     wire [7:0] spi_cmd = spi_buf[7:0];

@@ -19,24 +19,48 @@ module tt_um_emern_top (
   assign uio_oe  = 8'd0;
   assign uo_out = {2'b00, pixel_out};
 
-  reg [15:0] d_in;
   reg [9:0] row_counter;
   reg [9:0] col_counter;
 
-  // Random hooks to top level module
-  wire [1:0] cmp_en = {d_in[1], d_in[4]};
-  wire [5:0] background_color = 6'b000000;
-  wire [11:0] poly_color = d_in[15:4];
-  wire [13:0] v0_x = d_in & 14'b11000011110011;
-  wire [11:0] v0_y = d_in[15:4] & 12'b110011110011;
-  wire [13:0] v1_x = d_in;
-  wire [11:0] v1_y = d_in & 12'b111100001100;
-  wire [13:0] v2_x = ~d_in;
-  wire [11:0] v2_y = d_in[15:4] & 12'b101100101100;
-  wire [5:0] poly_depth = d_in | 6'b110100;
-
+  wire [1:0] cmp_en;
+  wire [5:0] background_color;
+  wire [11:0] poly_color;
+  wire [13:0] v0_x;
+  wire [11:0] v0_y;
+  wire [13:0] v1_x;
+  wire [11:0] v1_y;
+  wire [13:0] v2_x;
+  wire [11:0] v2_y;
+  wire [5:0] poly_depth;
   wire [5:0] pixel_out;
+  wire en_screen;
 
+
+  // Frontend handles SPI transfers and logic
+  tt_um_emern_frontend frontend (
+    .clk(clk),
+    .rst_n(rst_n),
+
+    // SPI params
+    .cs_in(ui_in[0]),
+    .mosi_in(ui_in[1]),
+    .miso_in(ui_in[2]),
+    .sck_in(ui_in[3]),
+    .en_load(1'b1), // TODO: Fix
+
+    // Stored outputs
+    .bg_color_out(background_color), // Background register
+    .poly_color_out(poly_color), // Packed polygon color
+    .v0_x_out(v0_x), // Packed polygon v0 x
+    .v0_y_out(v0_y), // Packed polygon v0 y
+    .v1_x_out(v1_x), // Packed polygon v1 x
+    .v1_y_out(v1_y), // Packed polygon v1 y
+    .v2_x_out(v2_x), // Packed polygon v2 x
+    .v2_y_out(v2_y), // Packed polygon v2 y
+    .poly_depth_out(poly_depth), // Packed polygon depth
+    .en_screen_out(en_screen), // Enable screen output
+    .poly_enable_out(cmp_en) // Enable polygons individually
+);
 
   // Pixel core drives all rasterization logic and has internal state
   tt_um_emern_pixel_core pixel_core (
@@ -61,13 +85,11 @@ module tt_um_emern_top (
   // Register for data input and row/col counters
   always @(posedge clk) begin
     if (rst_n == 1'b0) begin
-      d_in <= 0;
       row_counter <= 0;
       col_counter <= 0;
     end
 
     else begin
-      d_in <= {uio_in, ui_in};
       // TODO: Saturate these counters at the right point
       row_counter <= row_counter + 1'b1;
       col_counter <= col_counter + 1'b1;
