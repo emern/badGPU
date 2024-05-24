@@ -20,8 +20,6 @@ module tt_um_emern_vga(
 
 	reg [9:0] x_count;
     reg [9:0] y_count;
-    wire h_sync;
-    wire v_sync;
 
     // Horizontal line is in visible portion when x < 640 or when x < 1010000000
     // Total range is 0-800 so we also need to check x < 1100100000
