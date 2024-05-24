@@ -17,6 +17,7 @@ module tt_um_emern_top (
 );
   assign uio_out = {3'b000, screen_inactive, 1'b0, miso, 2'b00}; // INT and MISO pins
   assign uio_oe  = 8'b00010100; // Output for INT and MISO
+  // R1, G1, B1, vsync, R0, G0, B0, hsync
   assign uo_out = {h_sync, pixel_out[0], pixel_out[2], pixel_out[4], v_sync, pixel_out[1], pixel_out[3], pixel_out[5]};
 
   wire [9:0] row_counter;
@@ -33,7 +34,6 @@ module tt_um_emern_top (
   wire [11:0] v2_y;
   wire [5:0] poly_depth;
   wire [5:0] pixel_out;
-  wire en_screen; // TODO: Decide if its worth supporting this... Might not be worth the hardware
   wire screen_inactive;
   wire h_sync;
   wire v_sync;
@@ -72,7 +72,6 @@ module tt_um_emern_top (
     .v2_x_out(v2_x), // Packed polygon v2 x
     .v2_y_out(v2_y), // Packed polygon v2 y
     .poly_depth_out(poly_depth), // Packed polygon depth
-    .en_screen_out(en_screen), // Enable screen output
     .poly_enable_out(cmp_en) // Enable polygons individually
 );
 

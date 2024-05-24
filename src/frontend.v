@@ -39,13 +39,11 @@ module tt_um_emern_frontend (
     output [13:0] v2_x_out, // Packed polygon v2 x
     output [11:0] v2_y_out, // Packed polygon v2 y
     output [5:0] poly_depth_out, // Packed polygon depth
-    output en_screen_out, // Enable screen output
     output [1:0] poly_enable_out // Enable polygons individually
 );
 
     // Stored polygon and screen data
     reg [5:0] bg_color;
-    reg screen_enable;
     reg [1:0] poly_en;
 
     // Polygon A
@@ -99,7 +97,7 @@ module tt_um_emern_frontend (
             spi_counter <= 0;
             spi_buf_reversed <= 0;
         end
-        else if (((sck_rise & en_load) | (sck_rise & ~en_screen_out)) & ~spi_complete) begin
+        else if ((sck_rise & en_load) & ~spi_complete) begin
             // Run off the rising edge of the SPI clock
             // Only accept SPI communication when we are in the HSYNC section of the VGA display
             // Optionally, SPI communication is allowed when the display is turned off
@@ -136,7 +134,6 @@ module tt_um_emern_frontend (
         if (rst_n == 1'b0) begin
             // 0 out all registers
             bg_color <= 0;
-            screen_enable <= 0;
             poly_en <= 0;
             poly_a_color <= 0;
             poly_a_v0_x <= 0;
@@ -203,12 +200,6 @@ module tt_um_emern_frontend (
                     poly_b_depth <= 0;
                     poly_en[1] <= 1'b0;
                 end
-                `SPI_CMD_ENABLE_SCREEN: begin
-                    screen_enable <= 1'b1;
-                end
-                `SPI_CMD_DISABLE_SCREEN: begin
-                    screen_enable <= 1'b0;
-                end
                 `SPI_CMD_SET_BG_COLOR: begin
                     bg_color <= spi_buf[13:8];
                 end
@@ -227,7 +218,6 @@ module tt_um_emern_frontend (
     assign v2_x_out = {poly_b_v2_x, poly_a_v2_x};
     assign v2_y_out = {poly_b_v2_y, poly_a_v2_y};
     assign poly_depth_out = {poly_b_depth, poly_a_depth};
-    assign en_screen_out = screen_enable;
     assign poly_enable_out = poly_en;
 
 endmodule

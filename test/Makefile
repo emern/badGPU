@@ -12,6 +12,7 @@ clean:
 	rm -f results_ray_tracer_core.xml
 	rm -f results_inverse.xml
 	rm -f results_frontend.xml
+	rm -f results_vga.xml
 
 # Test job in CI should build all unit tests
 ci:
