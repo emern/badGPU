@@ -4,7 +4,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = top.v pixel_core.v raster_core.v frontend.v
+PROJECT_SOURCES = frontend.v
 
 ifneq ($(GATES),yes)
 
@@ -33,11 +33,13 @@ endif
 
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v 
-TOPLEVEL = tb
+VERILOG_SOURCES += $(PWD)/tb_frontend.v 
+TOPLEVEL = tb_frontend
 
 # MODULE is the basename of the Python test file
-MODULE = test
+MODULE = test_frontend
+
+COCOTB_RESULTS_FILE = results_frontend.xml
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
