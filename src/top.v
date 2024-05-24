@@ -58,7 +58,7 @@ module tt_um_emern_top (
     // SPI params
     .cs_in(uio_in[0]),
     .mosi_in(uio_in[1]),
-    .miso_in(miso),
+    .miso_out(miso),
     .sck_in(uio_in[3]),
     .en_load(screen_inactive),
 
