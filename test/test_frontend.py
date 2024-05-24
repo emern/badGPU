@@ -92,12 +92,12 @@ async def manual_clock(in_sig, cycles: int, period_ns: int):
     """
     for _ in range(cycles):
 
-        # Start with rising edge of clock
-        in_sig.value = 1
+        # Start with falling edge of clock
+        in_sig.value = 0
 
         await Timer(period_ns/2, units='ns')
 
-        in_sig.value = 0
+        in_sig.value = 1
 
         await Timer(period_ns/2, units='ns')
 
@@ -132,9 +132,6 @@ async def send_spi_cmd(dut, cmd: SPIcmd):
 
         # Set MOSI
         dut.mosi_in.value = cmd.get_bit_by_index(bit)
-
-        # Let signal settle first, clock method starts immediately with the posedge in simulation
-        await Timer(50, units='ns')
 
         # Wait 1 SPI clock
         await manual_clock(dut.sck_in, 1, 250)
@@ -811,6 +808,8 @@ async def test_write_many_polygons(dut):
 
         # Send command
         await send_spi_cmd(dut, cmd=cmd_a)
+
+        await ClockCycles(dut.clk, 2)
 
         # Background and screen enable CMDs should not have changed
         assert dut.bg_color_out.value == 0
