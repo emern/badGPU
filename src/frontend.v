@@ -88,7 +88,7 @@ module tt_um_emern_frontend (
         else begin
             sck_buf <= {sck_buf[1:0], sck_in};
             cs_buf <= {cs_buf[0], cs_in};
-            mosi_buf <= {mosi_buf[2:0], mosi_in};
+            mosi_buf <= {mosi_buf[0], mosi_in};
         end
     end
 
