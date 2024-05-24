@@ -14,7 +14,7 @@ module tb_frontend ();
   reg rst_n;
   reg cs_in;
   reg mosi_in;
-  reg miso_in;
+  reg miso_out;
   reg sck_in;
   reg en_load;
 
@@ -38,7 +38,7 @@ module tb_frontend ();
 
     .cs_in(cs_in),
     .mosi_in(mosi_in),
-    .miso_in(miso_in),
+    .miso_out(miso_out),
     .sck_in(sck_in),
     .en_load(en_load),
 

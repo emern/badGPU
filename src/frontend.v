@@ -25,7 +25,7 @@ module tt_um_emern_frontend (
     // SPI params
     input cs_in,
     input mosi_in,
-    input miso_in,
+    output miso_out,
     input sck_in,
     input en_load,
 
@@ -75,6 +75,8 @@ module tt_um_emern_frontend (
     reg [2:0] sck_buf;
     reg [1:0] cs_buf;
     reg [1:0] mosi_buf;
+
+    assign miso_out = 0;
 
     // SPI data registers are shift registers to handle timing
     always @(posedge clk) begin

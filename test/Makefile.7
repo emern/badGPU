@@ -4,7 +4,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = top.v pixel_core.v raster_core.v frontend.v vga.v
+PROJECT_SOURCES = vga.v
 
 ifneq ($(GATES),yes)
 
@@ -33,11 +33,13 @@ endif
 
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v 
-TOPLEVEL = tb
+VERILOG_SOURCES += $(PWD)/tb_vga.v 
+TOPLEVEL = tb_vga
 
 # MODULE is the basename of the Python test file
-MODULE = test
+MODULE = test_vga
+
+COCOTB_RESULTS_FILE = results_vga.xml
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim

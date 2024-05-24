@@ -15,12 +15,12 @@ module tt_um_emern_top (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
-  assign uio_out = 8'd0;
-  assign uio_oe  = 8'd0;
-  assign uo_out = {2'b00, pixel_out};
+  assign uio_out = {3'b000, screen_inactive, 1'b0, miso, 2'b00}; // INT and MISO pins
+  assign uio_oe  = 8'b00010100; // Output for INT and MISO
+  assign uo_out = {h_sync, pixel_out[0], pixel_out[2], pixel_out[4], v_sync, pixel_out[1], pixel_out[3], pixel_out[5]};
 
-  reg [9:0] row_counter;
-  reg [9:0] col_counter;
+  wire [9:0] row_counter;
+  wire [9:0] col_counter;
 
   wire [1:0] cmp_en;
   wire [5:0] background_color;
@@ -33,8 +33,22 @@ module tt_um_emern_top (
   wire [11:0] v2_y;
   wire [5:0] poly_depth;
   wire [5:0] pixel_out;
-  wire en_screen;
+  wire en_screen; // TODO: Decide if its worth supporting this... Might not be worth the hardware
+  wire screen_inactive;
+  wire h_sync;
+  wire v_sync;
+  wire miso;
 
+  // VGA handles timing of pixels w/monitor
+  tt_um_emern_vga vga (
+    .clk(clk),
+    .rst_n(rst_n),
+    .h_sync(h_sync),
+    .v_sync(v_sync),
+    .row_counter(row_counter),
+    .col_counter(col_counter),
+    .screen_inactive(screen_inactive)
+  );
 
   // Frontend handles SPI transfers and logic
   tt_um_emern_frontend frontend (
@@ -42,11 +56,11 @@ module tt_um_emern_top (
     .rst_n(rst_n),
 
     // SPI params
-    .cs_in(ui_in[0]),
-    .mosi_in(ui_in[1]),
-    .miso_in(ui_in[2]),
-    .sck_in(ui_in[3]),
-    .en_load(1'b1), // TODO: Fix
+    .cs_in(uio_in[0]),
+    .mosi_in(uio_in[1]),
+    .miso_out(miso),
+    .sck_in(uio_in[3]),
+    .en_load(screen_inactive),
 
     // Stored outputs
     .bg_color_out(background_color), // Background register
@@ -67,7 +81,7 @@ module tt_um_emern_top (
     .clk(clk),
     .rst_n(rst_n),
     .cmp_en(cmp_en), // Enable polygon rasterization (one-hot encoded)
-    .pixel_row(row_counter[8:0]), // Current pixel row location
+    .pixel_row(row_counter[8:0]), // Current pixel row location - only care about the first 479 counts
     .pixel_col(col_counter), // Current pixel column location
     .background_color(background_color), // Background color to use when pixel is not within a triangle
     .poly_color(poly_color), // Packed polygon color
@@ -79,21 +93,7 @@ module tt_um_emern_top (
     .v2_y(v2_y), // Packed polygon v2_y
     .poly_depth(poly_depth), // Packed polygon depth
 
-    .pixel_out(pixel_out) // Output color for that pixel, rrggbb
+    .pixel_out(pixel_out) // Output color for that pixel, r1r0g1g0b1b0
   );
-
-  // Register for data input and row/col counters
-  always @(posedge clk) begin
-    if (rst_n == 1'b0) begin
-      row_counter <= 0;
-      col_counter <= 0;
-    end
-
-    else begin
-      // TODO: Saturate these counters at the right point
-      row_counter <= row_counter + 1'b1;
-      col_counter <= col_counter + 1'b1;
-    end
-  end
 
 endmodule
