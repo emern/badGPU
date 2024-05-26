@@ -20,6 +20,22 @@ module tb_top ();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
+  wire [2:0] red_out = {uo_out[0], uo_out[4]};
+  wire [2:0] green_out = {uo_out[1], uo_out[5]};
+  wire [2:0] blue_out = {uo_out[2], uo_out[6]};
+  wire hsync = uo_out[7];
+  wire vsync = uo_out[3];
+
+  wire spi_sck;
+  wire spi_mosi;
+  wire spi_cs;
+
+  assign uio_in[3] = spi_sck;
+  assign uio_in[1] = spi_mosi;
+  assign uio_in[0] = spi_cs;
+
+  wire int_out = uio_out[4];
+
   // Replace tt_um_example with your module name:
   tt_um_emern_top user_project (
 

@@ -55,3 +55,8 @@ frontend:
 vga:
 	rm -f -r sim_build/rtl
 	make -f Makefile.7
+
+# Unit tests for top level module
+top:
+	rm -f -r sim_build/rtl
+	make -f Makefile.1 SAVE_IMGS=True

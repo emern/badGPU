@@ -12,6 +12,7 @@ from cocotb.triggers import Timer
 import numpy as np
 from matplotlib import pyplot as plt
 from os import environ
+from shared_utils import should_pixel_be_rasterized
 
 SAVED_IMAGE_PATH = 'image_artifacts/rasterization/'
 
@@ -29,29 +30,6 @@ def print_internal_state(dut):
     print(dut.user_project.r_res_c.value)
     print(dut.rasterize.value)
     print("End State ---")
-
-
-def should_pixel_be_rasterized(v0, v1, v2, p_x, p_y, log=False):
-    """
-    Manual check of rasterization algorithm
-    """
-    p0 = (v1[0] - v0[0]) * (p_y - v0[1]) - (v1[1] - v0[1]) * (p_x - v0[0])
-    p1 = (v2[0] - v1[0]) * (p_y - v1[1]) - (v2[1] - v1[1]) * (p_x - v1[0])
-    p2 = (v0[0] - v2[0]) * (p_y - v2[1]) - (v0[1] - v2[1]) * (p_x - v2[0])
-
-    if log == True:
-        print((v1[0] - v0[0]) * (p_y - v0[1]))
-        print((v1[1] - v0[1]) * (p_x - v0[0]))
-        print((v2[0] - v1[0]) * (p_y - v1[1]))
-        print((v2[1] - v1[1]) * (p_x - v1[0]))
-        print((v0[0] - v2[0]) * (p_y - v2[1]))
-        print((v0[1] - v2[1]) * (p_x - v2[0]))
-
-    if (p0 >= 0) and (p1 >= 0) and (p2 >= 0):
-        return 1
-    else:
-        return 0
-    
 
 def set_polygon(dut, v0, v1, v2):
     """

@@ -9,6 +9,7 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, Timer
 import numpy as np
+from shared_utils import upscale_color, Polygon, should_pixel_be_rasterized
 from PIL import Image
 from os import environ
 
@@ -21,40 +22,18 @@ COLOR_RED = 48 # 110000
 COLOR_GREEN = 12 # 001100
 COLOR_BLUE = 3 # 000011
 
-RED_CHANNEL = 2
-GREEN_CHANNEL = 1
-BLUE_CHANNEL = 0
-
-
-def upscale_color(color : int) -> np.ndarray:
-    """
-    Upscale color into RGB channels from 6 bit integer form to 8 bit RGB
-    """
-
-    # Split out RGB components seperately and apply scaling factor to each color
-    r_comp = ((color & COLOR_RED) >> 4) * 64
-    g_comp = ((color & COLOR_GREEN) >> 2) * 64
-    b_comp = (color & COLOR_BLUE) * 64
-
-    return np.array([r_comp, g_comp, b_comp])
-
-class Polygon:
+class PCPolygon(Polygon):
     """
     Structure to hold polygon params
     """
     def __init__(self, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, depth: int, color: int, enable: bool):
-        self.v0 = v0
-        self.v1 = v1
-        self.v2 = v2
-        self.raw_color = color
+        super().__init__(v0=v0, v1=v1, v2=v2, depth=depth, color=color)
+
+        # Enable is a unique parameter for the pixel core
         self.enable = enable
-        self.depth = depth
-
-        # Save as array for gt
-        self.color = upscale_color(color)
 
 
-def set_polygon_a(dut, poly: Polygon):
+def set_polygon_a(dut, poly: PCPolygon):
     """
     Set ploygon A rasterization params
     """
@@ -80,7 +59,7 @@ def set_polygon_a(dut, poly: Polygon):
         dut.en_a.value = 0
 
 
-def set_polygon_b(dut, poly: Polygon):
+def set_polygon_b(dut, poly: PCPolygon):
     """
     Set ploygon B rasterization params
     """
@@ -144,21 +123,7 @@ async def draw_screen(dut):
     return gen_arr
 
 
-def should_pixel_be_rasterized(v0, v1, v2, p_x, p_y):
-    """
-    Manual check of rasterization algorithm
-    """
-    p0 = (v1[0] - v0[0]) * (p_y - v0[1]) - (v1[1] - v0[1]) * (p_x - v0[0])
-    p1 = (v2[0] - v1[0]) * (p_y - v1[1]) - (v2[1] - v1[1]) * (p_x - v1[0])
-    p2 = (v0[0] - v2[0]) * (p_y - v2[1]) - (v0[1] - v2[1]) * (p_x - v2[0])
-
-    if (p0 >= 0) and (p1 >= 0) and (p2 >= 0):
-        return True
-    else:
-        return False
-
-
-def draw_screen_gt(poly_a: Polygon, poly_b: Polygon, bg_color: int):
+def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, bg_color: int):
     """
     Ground truth generation of whole screen
     """
@@ -170,13 +135,13 @@ def draw_screen_gt(poly_a: Polygon, poly_b: Polygon, bg_color: int):
 
             # Check poly A
             if (poly_a.enable):
-                a = should_pixel_be_rasterized(poly_a.v0, poly_a.v1, poly_a.v2, col, row)
+                a = bool(should_pixel_be_rasterized(poly_a.v0, poly_a.v1, poly_a.v2, col, row))
             else:
                 a = False
 
             # Check poly B
             if (poly_b.enable):
-                b = should_pixel_be_rasterized(poly_b.v0, poly_b.v1, poly_b.v2, col, row)
+                b = bool(should_pixel_be_rasterized(poly_b.v0, poly_b.v1, poly_b.v2, col, row))
             else:
                 b = False
 
@@ -225,14 +190,14 @@ async def test_multi_polygons(dut):
     await reset_dut(dut)
 
     # Polygon parameters
-    p_a = Polygon(v0=np.array([600, 200]),
+    p_a = PCPolygon(v0=np.array([600, 200]),
                 v1=np.array([440, 410]),
                 v2=np.array([0, 0]),
                 depth=0,
                 color=COLOR_RED,
                 enable=True)
 
-    p_b = Polygon(v0=np.array([640, 0]),
+    p_b = PCPolygon(v0=np.array([640, 0]),
                 v1=np.array([0, 480]),
                 v2=np.array([0, 0]),
                 depth=4,
@@ -278,14 +243,14 @@ async def test_empty_screen(dut):
     await reset_dut(dut)
 
     # Polygon parameters - should be disabled
-    p_a = Polygon(v0=np.array([600, 200]),
+    p_a = PCPolygon(v0=np.array([600, 200]),
                 v1=np.array([446, 412]),
                 v2=np.array([1, 1]),
                 depth=0,
                 color=COLOR_BLUE,
                 enable=False)
 
-    p_b = Polygon(v0=np.array([639, 0]),
+    p_b = PCPolygon(v0=np.array([639, 0]),
                 v1=np.array([0, 479]),
                 v2=np.array([0, 0]),
                 depth=4,
@@ -331,14 +296,14 @@ async def test_polygon_a(dut):
     await reset_dut(dut)
 
     # Polygon parameters
-    p_a = Polygon(v0=np.array([640, 200]),
+    p_a = PCPolygon(v0=np.array([640, 200]),
                 v1=np.array([300, 480]),
                 v2=np.array([100, 100]),
                 depth=0,
                 color=COLOR_BLUE,
                 enable=True)
 
-    p_b = Polygon(v0=np.array([640, 0]),
+    p_b = PCPolygon(v0=np.array([640, 0]),
                 v1=np.array([0, 480]),
                 v2=np.array([0, 0]),
                 depth=4,
@@ -384,14 +349,14 @@ async def test_polygon_b(dut):
     await reset_dut(dut)
 
     # Polygon parameters
-    p_a = Polygon(v0=np.array([640, 200]),
+    p_a = PCPolygon(v0=np.array([640, 200]),
                 v1=np.array([300, 480]),
                 v2=np.array([100, 100]),
                 depth=0,
                 color=COLOR_BLUE,
                 enable=False)
 
-    p_b = Polygon(v0=np.array([220, 20]),
+    p_b = PCPolygon(v0=np.array([220, 20]),
                 v1=np.array([110, 300]),
                 v2=np.array([10, 30]),
                 depth=4,

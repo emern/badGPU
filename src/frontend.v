@@ -92,7 +92,7 @@ module tt_um_emern_frontend (
 
     // SPI buffer and counter
     always @(posedge clk) begin
-        if (cs | (rst_n == 0)) begin
+        if (cs | (rst_n == 1'b0)) begin
             // CS high means SPI should be not active
             spi_counter <= 0;
             spi_buf_reversed <= 0;

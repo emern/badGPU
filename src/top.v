@@ -17,7 +17,7 @@ module tt_um_emern_top (
 );
   assign uio_out = {3'b000, screen_inactive, 1'b0, miso, 2'b00}; // INT and MISO pins
   assign uio_oe  = 8'b00010100; // Output for INT and MISO
-  // R1, G1, B1, vsync, R0, G0, B0, hsync
+  // R1 - 0, G1 - 1, B1 - 2, vsync - 3, R0 - 4, G0 - 5, B0 - 6, hsync - 7
   assign uo_out = {h_sync, pixel_out[0], pixel_out[2], pixel_out[4], v_sync, pixel_out[1], pixel_out[3], pixel_out[5]};
 
   wire [9:0] row_counter;
