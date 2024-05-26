@@ -28,7 +28,6 @@ module tb_frontend ();
   reg [13:0] v2_x_out;
   reg [11:0] v2_y_out;
   reg [5:0] poly_depth_out;
-  reg en_screen_out;
   reg [1:0] poly_enable_out;
 
 
@@ -51,7 +50,6 @@ module tb_frontend ();
     .v2_x_out(v2_x_out),
     .v2_y_out(v2_y_out),
     .poly_depth_out(poly_depth_out),
-    .en_screen_out(en_screen_out),
     .poly_enable_out(poly_enable_out)
   );
 

@@ -12,6 +12,7 @@ clean:
 	rm -f results_ray_tracer_core.xml
 	rm -f results_inverse.xml
 	rm -f results_frontend.xml
+	rm -f results_vga.xml
 
 # Test job in CI should build all unit tests
 ci:
@@ -54,3 +55,8 @@ frontend:
 vga:
 	rm -f -r sim_build/rtl
 	make -f Makefile.7
+
+# Unit tests for top level module
+top:
+	rm -f -r sim_build/rtl
+	make -f Makefile.1 SAVE_IMGS=True
