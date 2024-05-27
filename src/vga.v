@@ -15,7 +15,8 @@ module tt_um_emern_vga(
     output v_sync,
 	output [9:0] row_counter,
 	output [9:0] col_counter,
-	output screen_inactive
+	output screen_inactive,
+    output cmd_en
 	);
 
 	reg [9:0] x_count;
@@ -39,6 +40,7 @@ module tt_um_emern_vga(
     wire y_max = &{y_count[9], y_count[3:2]};
 
 	assign screen_inactive = (invisible_x | invisible_y);
+    assign cmd_en = invisible_y;
 	assign h_sync = ~ ((x_count > 10'd655) & (x_count < 10'd752));
     // Sync pulse on y=490 and y=491 only
     // Slight optimization: Do this bitwise

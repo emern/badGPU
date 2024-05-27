@@ -15,7 +15,7 @@ module tt_um_emern_top (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
-  assign uio_out = {3'b000, v_sync, 1'b0, miso, 2'b00}; // INT and MISO pins
+  assign uio_out = {3'b000, cmd_end, 1'b0, miso, 2'b00}; // INT and MISO pins
   assign uio_oe  = 8'b00010100; // Output for INT and MISO
   // R1 - 0, G1 - 1, B1 - 2, vsync - 3, R0 - 4, G0 - 5, B0 - 6, hsync - 7
   assign uo_out = {h_sync, pixel_out_gated[0], pixel_out_gated[2], pixel_out_gated[4], v_sync, pixel_out_gated[1], pixel_out_gated[3], pixel_out_gated[5]};
@@ -41,6 +41,7 @@ module tt_um_emern_top (
   wire h_sync;
   wire v_sync;
   wire miso;
+  wire cmd_end;
 
   // VGA handles timing of pixels w/monitor
   tt_um_emern_vga vga (
@@ -50,7 +51,8 @@ module tt_um_emern_top (
     .v_sync(v_sync),
     .row_counter(row_counter),
     .col_counter(col_counter),
-    .screen_inactive(screen_inactive)
+    .screen_inactive(screen_inactive),
+    .cmd_en(cmd_end)
   );
 
   // Frontend handles SPI transfers and logic
