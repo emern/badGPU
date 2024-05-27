@@ -95,6 +95,12 @@ async def test_vga_synchronization(dut):
             else:
                 assert dut.v_sync.value == 1
 
+            # Check INT signal
+            if row >= 480:
+                assert dut.cmd_en.value == 1
+            else:
+                assert dut.cmd_en.value == 0
+
             # Cycle clock
             await ClockCycles(dut.clk, 1)
 
@@ -126,6 +132,12 @@ async def test_vga_synchronization(dut):
                 assert dut.v_sync.value == 0
             else:
                 assert dut.v_sync.value == 1
+
+            # Check INT signal
+            if row >= 480:
+                assert dut.cmd_en.value == 1
+            else:
+                assert dut.cmd_en.value == 0
 
             # Cycle clock
             await ClockCycles(dut.clk, 1)

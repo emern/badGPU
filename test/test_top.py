@@ -81,7 +81,7 @@ class VGAScreen:
                 assert self.dut.vsync.value == 1
 
             # Check INT pin
-            if self.pos_x >= 640 or self.pos_y >= 480:
+            if self.pos_y >= 480:
                 assert self.dut.int_out.value == 1
             else:
                 assert self.dut.int_out.value == 0

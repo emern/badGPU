@@ -16,6 +16,7 @@ module tb_vga ();
 	reg [9:0] row_counter;
 	reg [9:0] col_counter;
 	reg screen_inactive;
+  reg cmd_en;
 
   // DUT
   tt_um_emern_vga user_project (
@@ -25,7 +26,8 @@ module tb_vga ();
     .v_sync(v_sync),
     .row_counter(row_counter),
     .col_counter(col_counter),
-    .screen_inactive(screen_inactive)
+    .screen_inactive(screen_inactive),
+    .cmd_en(cmd_en)
   );
 
 endmodule
