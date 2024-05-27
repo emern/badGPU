@@ -2,7 +2,7 @@
 
 # Default make just contains top level for GDS testing
 all:
-	make -f Makefile.1
+	make -f Makefile.1  SAVE_IMGS=False
 
 clean:
 	rm -f -r sim_build/rtl
@@ -16,7 +16,7 @@ clean:
 
 # Test job in CI should build all unit tests
 ci:
-	make -f Makefile.1
+	make -f Makefile.1  SAVE_IMGS=False
 	rm -f -r sim_build/rtl
 	make -f Makefile.2  SAVE_IMGS=False
 	rm -f -r sim_build/rtl
