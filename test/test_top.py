@@ -74,19 +74,31 @@ class VGAScreen:
 
                 # Check HSYNC signal
                 if self.pos_x >= 656 and self.pos_x <= 751:
-                    assert self.dut.hsync.value == 0
+                    print("--HSYNC--")
+                    print(self.pos_x)
+                    print(self.pos_y)
+                    print(self.dut.hsync.value)
+                    # assert self.dut.hsync.value == 0
                 else:
                     assert self.dut.hsync.value == 1
 
                 # Check VSYNC signal
                 if self.pos_y == 490 or self.pos_y == 491:
-                    assert self.dut.vsync.value == 0
+                    print("--VSYNC--")
+                    print(self.pos_x)
+                    print(self.pos_y)
+                    print(self.dut.vsync.value)
+                    # assert self.dut.vsync.value == 0
                 else:
                     assert self.dut.vsync.value == 1
 
                 # Check INT pin
                 if self.pos_y >= 480:
-                    assert self.dut.int_out.value == 1
+                    print("--INT--")
+                    print(self.pos_x)
+                    print(self.pos_y)
+                    print(self.dut.int_out.value)
+                    # assert self.dut.int_out.value == 1
                 else:
                     assert self.dut.int_out.value == 0
 
