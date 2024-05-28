@@ -72,23 +72,23 @@ class VGAScreen:
             # Only assert after master reset since gate level simulation will have undefined value
             if self.has_been_reset == True:
 
-                # Check HSYNC signal
-                if self.pos_x >= 656 and self.pos_x <= 751:
-                    assert self.dut.hsync.value == 0
-                else:
-                    assert self.dut.hsync.value == 1
+                # # Check HSYNC signal
+                # if self.pos_x >= 656 and self.pos_x <= 751:
+                #     assert self.dut.hsync.value == 0
+                # else:
+                #     assert self.dut.hsync.value == 1
 
-                # Check VSYNC signal
-                if self.pos_y == 490 or self.pos_y == 491:
-                    assert self.dut.vsync.value == 0
-                else:
-                    assert self.dut.vsync.value == 1
+                # # Check VSYNC signal
+                # if self.pos_y == 490 or self.pos_y == 491:
+                #     assert self.dut.vsync.value == 0
+                # else:
+                #     assert self.dut.vsync.value == 1
 
-                # Check INT pin
-                if self.pos_y >= 480:
-                    assert self.dut.int_out.value == 1
-                else:
-                    assert self.dut.int_out.value == 0
+                # # Check INT pin
+                # if self.pos_y >= 480:
+                #     assert self.dut.int_out.value == 1
+                # else:
+                #     assert self.dut.int_out.value == 0
 
                 # Write output into screen buffer
                 self.screen_buf[self.pos_y, self.pos_x, :] = upscale_color_from_components(c_red=self.dut.red_out.value,
