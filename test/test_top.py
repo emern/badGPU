@@ -74,9 +74,6 @@ class VGAScreen:
 
                 # Check HSYNC signal
                 if self.pos_x >= 656 and self.pos_x <= 751:
-                    print(self.pos_x)
-                    print(self.pos_y)
-                    print(self.dut.hsync.value)
                     assert self.dut.hsync.value == 0
                 else:
                     assert self.dut.hsync.value == 1
@@ -231,7 +228,6 @@ async def reset_device(dut, screen: VGAScreen):
     dut.rst_n.value = 0
     await Timer(calc_cycles(10), units='ns')
     dut.rst_n.value = 1
-    await Timer(calc_cycles(1), units='ns')
     screen.has_been_reset = True
 
 
