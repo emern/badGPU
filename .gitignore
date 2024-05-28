@@ -11,3 +11,12 @@ test/results.xml
 test/results*.xml
 test/gate_level_netlist.v
 test/image_artifacts/*
+
+# Quartus stuff
+*.qpf
+*.qsf*
+*/db/
+*/incremental_db/
+quartus_build/simulation/
+quartus_build/output_files/
+quartus_build/c5_pin_model_dump.txt

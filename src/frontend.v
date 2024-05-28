@@ -160,7 +160,7 @@ module tt_um_emern_frontend (
                     poly_a_v0_x <= spi_buf[20:14];
                     poly_a_v1_x <= spi_buf[27:21];
                     poly_a_v2_x <= spi_buf[34:28];
-                    poly_a_v0_y <= spi_buf[41:35];
+                    poly_a_v0_y <= spi_buf[40:35];
                     poly_a_v1_y <= spi_buf[46:41];
                     poly_a_v2_y <= spi_buf[52:47];
                     poly_a_depth <= spi_buf[55:53];
@@ -183,7 +183,7 @@ module tt_um_emern_frontend (
                     poly_b_v0_x <= spi_buf[20:14];
                     poly_b_v1_x <= spi_buf[27:21];
                     poly_b_v2_x <= spi_buf[34:28];
-                    poly_b_v0_y <= spi_buf[41:35];
+                    poly_b_v0_y <= spi_buf[40:35];
                     poly_b_v1_y <= spi_buf[46:41];
                     poly_b_v2_y <= spi_buf[52:47];
                     poly_b_depth <= spi_buf[55:53];

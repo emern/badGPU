@@ -38,6 +38,7 @@ class VGAScreen:
         self.poly_b = None
         self.dut = dut
         self.clk_signal = clk_signal
+        self.has_been_reset = False
 
     async def clock(self):
         """
@@ -45,11 +46,11 @@ class VGAScreen:
         """
         while True:
             # Clock testbench
-            self.clk_signal.value = 1
+            self.clk_signal.value = 0
 
             await Timer(20, units='ns')
 
-            self.clk_signal.value = 0
+            self.clk_signal.value = 1
 
             # Little hack here, if we split this time up a little bit it guarantees we run the code below when using even 40ns clock period
             await Timer(19, units='ns')
@@ -68,60 +69,63 @@ class VGAScreen:
                 self.pos_y = 0
                 self.pos_x = 0
 
-            # Check HSYNC signal
-            if self.pos_x >= 656 and self.pos_x <= 751:
-                assert self.dut.hsync.value == 0
-            else:
-                assert self.dut.hsync.value == 1
-
-            # Check VSYNC signal
-            if self.pos_y == 490 or self.pos_y == 491:
-                assert self.dut.vsync.value == 0
-            else:
-                assert self.dut.vsync.value == 1
-
-            # Check INT pin
-            if self.pos_x >= 640 or self.pos_y >= 480:
-                assert self.dut.int_out.value == 1
-            else:
-                assert self.dut.int_out.value == 0
-
-            # Write output into screen buffer
-            self.screen_buf[self.pos_y, self.pos_x, :] = upscale_color_from_components(c_red=self.dut.red_out.value,
-                                                                                        c_green=self.dut.green_out.value,
-                                                                                        c_blue=self.dut.blue_out.value)
-
-            # Generate out "Ground truth" buffer value (if applicable)
-            if self.pos_x < 640 and self.pos_y < 480:
-                # Rasterize poly_a if required
-                if self.poly_a != None:
-                    a = bool(should_pixel_be_rasterized(v0=self.poly_a.v0,
-                                                    v1=self.poly_a.v1,
-                                                    v2=self.poly_a.v2,
-                                                    p_x=self.pos_x,
-                                                    p_y=self.pos_y))
+            # Only assert after master reset since gate level simulation will have undefined value
+            if self.has_been_reset == True:
+                # Check HSYNC signal
+                if self.pos_x >= 656 and self.pos_x <= 751:
+                    assert self.dut.hsync.value == 0
+                    pass
                 else:
-                    a = False
+                    assert self.dut.hsync.value == 1
 
-                # Rasterize poly_b if required
-                if self.poly_b != None:
-                    b = bool(should_pixel_be_rasterized(v0=self.poly_b.v0,
-                                                    v1=self.poly_b.v1,
-                                                    v2=self.poly_b.v2,
-                                                    p_x=self.pos_x,
-                                                    p_y=self.pos_y))
+                # Check VSYNC signal
+                if self.pos_y == 490 or self.pos_y == 491:
+                    assert self.dut.vsync.value == 0
                 else:
-                    b = False
+                    assert self.dut.vsync.value == 1
 
-                # Ground truth rasterization calc
-                if (a == False) and (b == False):
-                    self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
-                elif (a == False) and (b == True):
-                    self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_b.color
-                elif (a == True) and (b == False):
-                    self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color
+                # Check INT pin
+                if self.pos_y >= 480:
+                    assert self.dut.int_out.value == 1
                 else:
-                    self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color if (self.poly_a.depth < self.poly_b.depth) else self.poly_b.color
+                    assert self.dut.int_out.value == 0
+
+                # Write output into screen buffer
+                self.screen_buf[self.pos_y, self.pos_x, :] = upscale_color_from_components(c_red=self.dut.red_out.value,
+                                                                                            c_green=self.dut.green_out.value,
+                                                                                            c_blue=self.dut.blue_out.value)
+
+                # Generate out "Ground truth" buffer value (if applicable)
+                if self.pos_x < 640 and self.pos_y < 480:
+                    # Rasterize poly_a if required
+                    if self.poly_a != None:
+                        a = bool(should_pixel_be_rasterized(v0=self.poly_a.v0,
+                                                        v1=self.poly_a.v1,
+                                                        v2=self.poly_a.v2,
+                                                        p_x=self.pos_x,
+                                                        p_y=self.pos_y))
+                    else:
+                        a = False
+
+                    # Rasterize poly_b if required
+                    if self.poly_b != None:
+                        b = bool(should_pixel_be_rasterized(v0=self.poly_b.v0,
+                                                        v1=self.poly_b.v1,
+                                                        v2=self.poly_b.v2,
+                                                        p_x=self.pos_x,
+                                                        p_y=self.pos_y))
+                    else:
+                        b = False
+
+                    # Ground truth rasterization calc
+                    if (a == False) and (b == False):
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
+                    elif (a == False) and (b == True):
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_b.color
+                    elif (a == True) and (b == False):
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color
+                    else:
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color if (self.poly_a.depth < self.poly_b.depth) else self.poly_b.color
 
             # Round the clock cycle to 40ns
             await Timer(1, units='ns')
@@ -210,7 +214,7 @@ def check_frame_error(dut, gt: np.ndarray, gen: np.ndarray, tolerance: float):
         assert 1 == 0
 
 
-async def reset_device(dut):
+async def reset_device(dut, screen: VGAScreen):
     """
     Reset top level module
     
@@ -224,6 +228,7 @@ async def reset_device(dut):
     dut.rst_n.value = 0
     await Timer(calc_cycles(10), units='ns')
     dut.rst_n.value = 1
+    screen.has_been_reset = True
 
 
 @cocotb.test()
@@ -238,11 +243,10 @@ async def test_reset(dut):
     cocotb.start_soon(screen.clock())
 
     # Reset device
-    await reset_device(dut)
+    await reset_device(dut, screen=screen)
 
-    # Run 3 whole frames of the timing to be sure
     # Clock asserts screen state signals automatically
-    await Timer(calc_cycles(1), units='ns')
+    await Timer(calc_cycles(4), units='ns')
 
     dut._log.info("Finished")
 
@@ -260,7 +264,7 @@ async def test_empty_screen(dut):
 
     # Reset
     dut._log.info("Reset")
-    await reset_device(dut)
+    await reset_device(dut, screen=screen)
 
     # Run 2 whole frames of the timing to be sure
     await Timer(calc_cycles(SCREEN_N_CYCLES*2 + 1), units='ns')
@@ -279,7 +283,7 @@ async def test_draw_single_polygon_per_frame(dut):
     cocotb.start_soon(screen.clock())
 
     # Reset device
-    await reset_device(dut)
+    await reset_device(dut, screen=screen)
 
     # Run until we are at the hsync portion of drawing the screen
     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
@@ -306,7 +310,8 @@ async def test_draw_single_polygon_per_frame(dut):
 
     dut._log.info("Saving frame")
 
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')   
+
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)

@@ -71,7 +71,7 @@ class SPIcmd:
         """
         Encode the CMD as a 7 byte packed buffer
         """
-        return self.cmd_str.to_bytes(length=7, byteorder='little')
+        return self.cmd_str.to_bytes(length=7, byteorder='little').hex()
 
     def get_bit_by_index(self, index: int) -> int:
         """
