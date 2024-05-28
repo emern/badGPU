@@ -231,6 +231,7 @@ async def reset_device(dut, screen: VGAScreen):
     dut.rst_n.value = 0
     await Timer(calc_cycles(10), units='ns')
     dut.rst_n.value = 1
+    await Timer(calc_cycles(1), units='ns')
     screen.has_been_reset = True
 
 
