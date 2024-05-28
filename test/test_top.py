@@ -46,11 +46,11 @@ class VGAScreen:
         """
         while True:
             # Clock testbench
-            self.clk_signal.value = 1
+            self.clk_signal.value = 0
 
             await Timer(20, units='ns')
 
-            self.clk_signal.value = 0
+            self.clk_signal.value = 1
 
             # Little hack here, if we split this time up a little bit it guarantees we run the code below when using even 40ns clock period
             await Timer(19, units='ns')
@@ -71,34 +71,22 @@ class VGAScreen:
 
             # Only assert after master reset since gate level simulation will have undefined value
             if self.has_been_reset == True:
-
                 # Check HSYNC signal
                 if self.pos_x >= 656 and self.pos_x <= 751:
-                    print("--HSYNC--")
-                    print(self.pos_x)
-                    print(self.pos_y)
-                    print(self.dut.hsync.value)
-                    # assert self.dut.hsync.value == 0
+                    assert self.dut.hsync.value == 0
+                    pass
                 else:
                     assert self.dut.hsync.value == 1
 
                 # Check VSYNC signal
                 if self.pos_y == 490 or self.pos_y == 491:
-                    print("--VSYNC--")
-                    print(self.pos_x)
-                    print(self.pos_y)
-                    print(self.dut.vsync.value)
-                    # assert self.dut.vsync.value == 0
+                    assert self.dut.vsync.value == 0
                 else:
                     assert self.dut.vsync.value == 1
 
                 # Check INT pin
                 if self.pos_y >= 480:
-                    print("--INT--")
-                    print(self.pos_x)
-                    print(self.pos_y)
-                    print(self.dut.int_out.value)
-                    # assert self.dut.int_out.value == 1
+                    assert self.dut.int_out.value == 1
                 else:
                     assert self.dut.int_out.value == 0
 
@@ -257,9 +245,8 @@ async def test_reset(dut):
     # Reset device
     await reset_device(dut, screen=screen)
 
-    # Run 3 whole frames of the timing to be sure
     # Clock asserts screen state signals automatically
-    await Timer(calc_cycles(1), units='ns')
+    await Timer(calc_cycles(4), units='ns')
 
     dut._log.info("Finished")
 
@@ -323,7 +310,8 @@ async def test_draw_single_polygon_per_frame(dut):
 
     dut._log.info("Saving frame")
 
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')   
+
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)

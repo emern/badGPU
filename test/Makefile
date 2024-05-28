@@ -60,3 +60,8 @@ vga:
 top:
 	rm -f -r sim_build/rtl
 	make -f Makefile.1 SAVE_IMGS=True
+
+# Gatelevel tests
+gatelevel:
+	rm -f -r sim_build/rtl
+	make -f Makefile.1 SAVE_IMGS=True GATES=yes
