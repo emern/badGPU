@@ -74,8 +74,8 @@ class VGAScreen:
 
                 # Check HSYNC signal
                 if self.pos_x >= 656 and self.pos_x <= 751:
-                    print(self.pos_x.value)
-                    print(self.pos_y.value)
+                    print(self.pos_x)
+                    print(self.pos_y)
                     print(self.dut.hsync.value)
                     assert self.dut.hsync.value == 0
                 else:
