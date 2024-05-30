@@ -98,8 +98,8 @@ class SPIcmd:
         """
         Create SPI CMD from a polygon struct
         """
-        return cls(cmd, poly.raw_color, int(poly.v0[0]/10), int(poly.v1[0]/10), int(poly.v2[0]/10), int(poly.v0[1]/10),
-                                                                    int(poly.v1[1]/10), int(poly.v2[1]/10))
+        return cls(cmd, poly.raw_color, int(poly.v0[0] / 8), int(poly.v1[0] / 8), int(poly.v2[0] / 8), int(poly.v0[1] / 8),
+                                                                    int(poly.v1[1] / 8), int(poly.v2[1] / 8))
 
 
 async def manual_clock(in_sig, cycles: int, period_ns: int):

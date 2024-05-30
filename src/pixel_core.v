@@ -27,33 +27,31 @@ module tt_um_emern_pixel_core (
     // Registered data, hold output pixel color and depth mapping
     reg [5:0] cur_pixel;
 
-    // TODO: check if its more efficient to share hardware for this and just register all bits
     // Unpack polygon A vertices, should be multiplied by 10
-    wire [9:0] v0_x_a = (v0_x[6:0] << 3) + (v0_x[6:0] << 1);
-    wire [8:0] v0_y_a = (v0_y[5:0] << 3) + (v0_y[5:0] << 1);
+    wire [9:0] v0_x_a = (v0_x[6:0] << 3);
+    wire [8:0] v0_y_a = (v0_y[5:0] << 3);
 
-    wire [9:0] v1_x_a = (v1_x[6:0] << 3) + (v1_x[6:0] << 1);
-    wire [8:0] v1_y_a = (v1_y[5:0] << 3) + (v1_y[5:0] << 1);
+    wire [9:0] v1_x_a = (v1_x[6:0] << 3);
+    wire [8:0] v1_y_a = (v1_y[5:0] << 3);
 
-    wire [9:0] v2_x_a = (v2_x[6:0] << 3) + (v2_x[6:0] << 1);
-    wire [8:0] v2_y_a = (v2_y[5:0] << 3) + (v2_y[5:0] << 1);
+    wire [9:0] v2_x_a = (v2_x[6:0] << 3);
+    wire [8:0] v2_y_a = (v2_y[5:0] << 3);
 
     wire rasterize_a;
     wire rasterize_a_gated = rasterize_a & cmp_en[0];
 
     // Unpack polygon B vertices, should be multiplied by 10
-    wire [9:0] v0_x_b = (v0_x[13:7] << 3) + (v0_x[13:7] << 1);
-    wire [8:0] v0_y_b = (v0_y[11:6] << 3) + (v0_y[11:6] << 1);
+    wire [9:0] v0_x_b = (v0_x[13:7] << 3);
+    wire [8:0] v0_y_b = (v0_y[11:6] << 3);
 
-    wire [9:0] v1_x_b = (v1_x[13:7] << 3) + (v1_x[13:7] << 1);
-    wire [8:0] v1_y_b = (v1_y[11:6] << 3) + (v1_y[11:6] << 1);
+    wire [9:0] v1_x_b = (v1_x[13:7] << 3);
+    wire [8:0] v1_y_b = (v1_y[11:6] << 3);
 
-    wire [9:0] v2_x_b = (v2_x[13:7] << 3) + (v2_x[13:7] << 1);
-    wire [8:0] v2_y_b = (v2_y[11:6] << 3) + (v2_y[11:6] << 1);
+    wire [9:0] v2_x_b = (v2_x[13:7] << 3);
+    wire [8:0] v2_y_b = (v2_y[11:6] << 3);
 
     wire rasterize_b;
     wire rasterize_b_gated = rasterize_b & cmp_en[1];
-
 
     assign pixel_out = cur_pixel;
 
