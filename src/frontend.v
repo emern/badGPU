@@ -194,6 +194,9 @@ module tt_um_emern_frontend (
                 `SPI_CMD_SET_BG_COLOR: begin
                     bg_color <= spi_buf[13:8];
                 end
+                default: begin
+                    // Do nothing
+                end
             endcase
         end
     end

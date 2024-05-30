@@ -10,13 +10,10 @@ import numpy as np
 SPI_CMD_TOTAL_BITS = 56
 
 # Valid SPI commands
-SPI_CMD_DEV_ID = 0
 SPI_CMD_WRITE_POLY_A = 0x80
 SPI_CMD_CLEAR_POLY_A = 0x40
 SPI_CMD_WRITE_POLY_B = 0x81
 SPI_CMD_CLEAR_POLY_B = 0x41
-SPI_CMD_ENABLE_SCREEN = 0x21
-SPI_CMD_DISABLE_SCREEN = 0x20
 SPI_CMD_SET_BG_COLOR = 0x01
 
 # Colors mapping
@@ -100,6 +97,23 @@ class SPIcmd:
         """
         return cls(cmd, poly.raw_color, int(poly.v0[0]/10), int(poly.v1[0]/10), int(poly.v2[0]/10), int(poly.v0[1]/10),
                                                                     int(poly.v1[1]/10), int(poly.v2[1]/10))
+
+    @staticmethod
+    def is_cmd_valid(cmd: int) -> bool:
+        """
+        Check if a given byte is a valid cmd byte
+        """
+        if cmd == SPI_CMD_WRITE_POLY_A:
+            return True
+        if cmd == SPI_CMD_CLEAR_POLY_A:
+            return True
+        if cmd == SPI_CMD_WRITE_POLY_B:
+            return True
+        if cmd == SPI_CMD_CLEAR_POLY_B:
+            return True
+        if cmd == SPI_CMD_SET_BG_COLOR:
+            return True
+        return False
 
 
 async def manual_clock(in_sig, cycles: int, period_ns: int):
