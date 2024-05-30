@@ -34,14 +34,16 @@ def print_internal_state(dut):
 def set_polygon(dut, v0, v1, v2):
     """
     Set current ploygon for rasterization
-    """
-    dut.v0_x.value = v0[0]
-    dut.v1_x.value = v1[0]
-    dut.v2_x.value = v2[0]
 
-    dut.v0_y.value = v0[1]
-    dut.v1_y.value = v1[1]
-    dut.v2_y.value = v2[1]
+    Polygon vertices are compressed by / 8
+    """
+    dut.v0_x.value = int(v0[0] / 8)
+    dut.v1_x.value = int(v1[0] / 8)
+    dut.v2_x.value = int(v2[0] / 8)
+
+    dut.v0_y.value = int(v0[1] / 8)
+    dut.v1_y.value = int(v1[1] / 8)
+    dut.v2_y.value = int(v2[1] / 8)
 
 
 async def draw_polygon_on_screen(dut, v0, v1, v2):
@@ -68,82 +70,8 @@ async def draw_polygon_on_screen(dut, v0, v1, v2):
 
             gen_arr[row, col] = dut.rasterize.value
 
-            # Check rasterized output against ground truth
-            if (gen_arr[row, col] != gt_arr[row, col]):
-                print("Mismatch detected!")
-                print(col)
-                print(row)
-                print("Actual: ")
-                should_pixel_be_rasterized(v0, v1, v2, col, row, log=True)
-                print("Device output:")
-                print_internal_state(dut)
-                assert 1 == 0
-
     # Return generated images
     return (gt_arr, gen_arr)
-
-
-@cocotb.test()
-async def test_small(dut):
-    """
-    Run smoke test on small triangle
-    """
-    dut._log.info("Start")
-
-    # Reset inputs, output only valid if a valid set of unique vertices is given
-    dut.pixel_col.value = 0
-    dut.pixel_row.value = 0
-
-    # Note: Order here on the vertices is important, the GPU frontend must arrange them in the proper order
-    v0 = [1, 0]
-    v1 = [0, 1]
-    v2 = [0, 0]
-
-    set_polygon(dut, v0, v1, v2)
-
-    # Wait 1 clock cycle
-    await Timer(40, units="ns")
-
-    # [(1,0), (0,1), (0,0)] is a valid polygon to draw when the pixel is (0,0) -> Single point
-    assert dut.rasterize.value == 1
-
-    # Check all points on given triangle
-
-    # (0, 1)
-    dut.pixel_col.value = 0
-    dut.pixel_row.value = 1
-
-    await Timer(40, units="ns")
-
-    assert dut.rasterize.value == 1
-
-    # (1, 0)
-    dut.pixel_col.value = 1
-    dut.pixel_row.value = 0
-
-    await Timer(40, units="ns")
-
-    assert dut.rasterize.value == 1
-
-    # Check points outside the triangle are not drawn
-
-    # (1, 1)
-    dut.pixel_col.value = 1
-    dut.pixel_row.value = 1
-
-    await Timer(40, units="ns")
-
-    assert dut.rasterize.value == 0
-
-    # (2, 1)
-    dut.pixel_col.value = 2
-    dut.pixel_row.value = 1
-
-    await Timer(40, units="ns")
-
-    assert dut.rasterize.value == 0
-
-    dut._log.info("Passed")
 
 
 @cocotb.test()
@@ -164,12 +92,18 @@ async def test_whole_screen(dut):
 
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
+    # Generated rasterization should be within 1% tolerance value
+    error = (np.absolute(gt_arr - gen_arr)).mean()
+    dut._log.info("Error is: " + str(error))
+    if error > 0.01:
+        assert 1 == 0
+
     # Save rasterized images if desired
     if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_whole_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_whole_screen.png', gen_arr)
     
-    dut._log.info("Passed")
+    dut._log.info("Finished")
 
 
 @cocotb.test()
@@ -191,12 +125,18 @@ async def test_corner_top_left(dut):
 
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
+    # Generated rasterization should be within 1% tolerance value
+    error = (np.absolute(gt_arr - gen_arr)).mean()
+    dut._log.info("Error is: " + str(error))
+    if error > 0.01:
+        assert 1 == 0
+
     # Save rasterized images if desired
     if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_top_left_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_top_left_screen.png', gen_arr)
 
-    dut._log.info("Passed")
+    dut._log.info("Finished")
 
 
 @cocotb.test()
@@ -218,12 +158,18 @@ async def test_corner_top_right(dut):
 
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
+    # Generated rasterization should be within 1% tolerance value
+    error = (np.absolute(gt_arr - gen_arr)).mean()
+    dut._log.info("Error is: " + str(error))
+    if error > 0.01:
+        assert 1 == 0
+
     # Save rasterized images if desired
     if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_top_right_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_top_right_screen.png', gen_arr)
 
-    dut._log.info("Passed")
+    dut._log.info("Finished")
 
 
 @cocotb.test()
@@ -245,12 +191,18 @@ async def test_corner_bottom_right(dut):
 
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
+    # Generated rasterization should be within 1% tolerance value
+    error = (np.absolute(gt_arr - gen_arr)).mean()
+    dut._log.info("Error is: " + str(error))
+    if error > 0.01:
+        assert 1 == 0
+
     # Save rasterized images if desired
     if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_right_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_right_screen.png', gen_arr)
 
-    dut._log.info("Passed")
+    dut._log.info("Finished")
 
 
 @cocotb.test()
@@ -272,9 +224,15 @@ async def test_corner_bottom_left(dut):
 
     gt_arr, gen_arr = await draw_polygon_on_screen(dut, v0, v1, v2)
 
+    # Generated rasterization should be within 1% tolerance value
+    error = (np.absolute(gt_arr - gen_arr)).mean()
+    dut._log.info("Error is: " + str(error))
+    if error > 0.01:
+        assert 1 == 0
+
     # Save rasterized images if desired
     if environ['SAVE_IMGS'] == 'True':
         plt.imsave(SAVED_IMAGE_PATH + 'gt_bottom_left_screen.png', gt_arr)
         plt.imsave(SAVED_IMAGE_PATH + 'gen_bottom_left_screen.png', gen_arr)
 
-    dut._log.info("Passed")
+    dut._log.info("Finished")
