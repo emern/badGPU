@@ -14,13 +14,13 @@ module tb_raster_core ();
     reg [9:0] pixel_col;
     reg [8:0] pixel_row;
 
-    reg [9:0] v0_x;
-    reg [9:0] v1_x;
-    reg [9:0] v2_x;
+    reg [6:0] v0_x;
+    reg [6:0] v1_x;
+    reg [6:0] v2_x;
 
-    reg [8:0] v0_y;
-    reg [8:0] v1_y;
-    reg [8:0] v2_y;
+    reg [5:0] v0_y;
+    reg [5:0] v1_y;
+    reg [5:0] v2_y;
 
     reg rasterize;
 
