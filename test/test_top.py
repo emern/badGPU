@@ -117,15 +117,15 @@ class VGAScreen:
                     else:
                         b = False
 
-                    # Ground truth rasterization calc
-                    if (a == False) and (b == False):
-                        self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
-                    elif (a == False) and (b == True):
-                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_b.color
-                    elif (a == True) and (b == False):
+                    # Find the "in front" polygon
+                    if (a == True):
+                        # Polygon A takes "priority"
                         self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color
+                    elif (b == True):
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_b.color
                     else:
-                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_a.color if (self.poly_a.depth < self.poly_b.depth) else self.poly_b.color
+                        # Background color
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
 
             # Round the clock cycle to 40ns
             await Timer(1, units='ns')
@@ -167,7 +167,7 @@ class VGAScreen:
         self.poly_a = None
 
         # Generate and send command
-        new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_A, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0, depth=0)
+        new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_A, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0)
         await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
 
 
@@ -180,7 +180,7 @@ class VGAScreen:
         self.poly_b = None
 
         # Generate and send command
-        new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_B, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0, depth=0)
+        new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_B, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0)
         await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
 
 
@@ -294,7 +294,6 @@ async def test_draw_single_polygon_per_frame(dut):
     p_a = Polygon(v0=[600, 0],
                 v1=[200, 410],
                 v2=[10, 10],
-                depth=0,
                 color=COLOR_RED)
 
     # Set polygons internally
@@ -322,7 +321,6 @@ async def test_draw_single_polygon_per_frame(dut):
     p_b = Polygon(v0=[100, 0],
                 v1=[50, 480],
                 v2=[1, 1],
-                depth=1,
                 color=COLOR_GREEN)
 
     # Set polygons internally

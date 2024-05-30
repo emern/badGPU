@@ -26,8 +26,8 @@ class PCPolygon(Polygon):
     """
     Structure to hold polygon params
     """
-    def __init__(self, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, depth: int, color: int, enable: bool):
-        super().__init__(v0=v0, v1=v1, v2=v2, depth=depth, color=color)
+    def __init__(self, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, color: int, enable: bool):
+        super().__init__(v0=v0, v1=v1, v2=v2, color=color)
 
         # Enable is a unique parameter for the pixel core
         self.enable = enable
@@ -48,9 +48,6 @@ def set_polygon_a(dut, poly: PCPolygon):
 
     # Set color
     dut.poly_color_a.value = poly.raw_color
-
-    # Set depth
-    dut.poly_depth_a.value = poly.depth
 
     # Enable rasterization
     if poly.enable == True:
@@ -74,9 +71,6 @@ def set_polygon_b(dut, poly: PCPolygon):
 
     # Set color
     dut.poly_color_b.value = poly.raw_color
-
-    # Set depth
-    dut.poly_depth_b.value = poly.depth
 
     # Enable rasterization
     if poly.enable == True:
@@ -146,14 +140,14 @@ def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, bg_color: int):
                 b = False
 
             # Find the "in front" polygon
-            if (a == True) and (b == False):
+            if (a == True):
+                # Polygon A takes "priority"
                 gt_arr[row, col, :] = poly_a.color
-            elif (a == False) and (b == True):
+            elif (b == True):
                 gt_arr[row, col, :] = poly_b.color
-            elif (a == False) and (b == False):
-                gt_arr[row, col, :] = upscale_color(bg_color)
             else:
-                gt_arr[row, col, :] = poly_a.color if (poly_a.depth < poly_b.depth) else poly_b.color
+                # Background color
+                gt_arr[row, col, :] = upscale_color(bg_color)
 
     return gt_arr
 
@@ -193,14 +187,12 @@ async def test_multi_polygons(dut):
     p_a = PCPolygon(v0=np.array([600, 200]),
                 v1=np.array([440, 410]),
                 v2=np.array([0, 0]),
-                depth=0,
                 color=COLOR_RED,
                 enable=True)
 
     p_b = PCPolygon(v0=np.array([640, 0]),
                 v1=np.array([0, 480]),
                 v2=np.array([0, 0]),
-                depth=4,
                 color=COLOR_GREEN,
                 enable=True)
 
@@ -221,7 +213,7 @@ async def test_multi_polygons(dut):
         gen_img.save(SAVED_IMAGE_PATH + 'gen_multi_poly_test.png')
 
     # Check error
-    error = np.absolute(gt_arr - gen_arr).mean()
+    error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
     dut._log.info("Multilayered test error is " + str(error))
     if error > 0.2:
         assert 1 == 0
@@ -246,14 +238,12 @@ async def test_empty_screen(dut):
     p_a = PCPolygon(v0=np.array([600, 200]),
                 v1=np.array([446, 412]),
                 v2=np.array([1, 1]),
-                depth=0,
                 color=COLOR_BLUE,
                 enable=False)
 
     p_b = PCPolygon(v0=np.array([639, 0]),
                 v1=np.array([0, 479]),
                 v2=np.array([0, 0]),
-                depth=4,
                 color=COLOR_GREEN,
                 enable=False)
 
@@ -274,7 +264,7 @@ async def test_empty_screen(dut):
         gen_img.save(SAVED_IMAGE_PATH + 'gen_empty_screen.png')
 
     # Check error
-    error = np.absolute(gt_arr - gen_arr).mean()
+    error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
     dut._log.info("Red background test error is " + str(error))
     if error > 0.001:
         assert 1 == 0
@@ -299,14 +289,12 @@ async def test_polygon_a(dut):
     p_a = PCPolygon(v0=np.array([640, 200]),
                 v1=np.array([300, 480]),
                 v2=np.array([100, 100]),
-                depth=0,
                 color=COLOR_BLUE,
                 enable=True)
 
     p_b = PCPolygon(v0=np.array([640, 0]),
                 v1=np.array([0, 480]),
                 v2=np.array([0, 0]),
-                depth=4,
                 color=COLOR_GREEN,
                 enable=False)
 
@@ -327,7 +315,7 @@ async def test_polygon_a(dut):
         gen_img.save(SAVED_IMAGE_PATH + 'gen_poly_a_test.png')
 
     # Check error
-    error = np.absolute(gt_arr - gen_arr).mean()
+    error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
     dut._log.info("Poly A test error is " + str(error))
     if error > 0.2:
         assert 1 == 0
@@ -352,14 +340,12 @@ async def test_polygon_b(dut):
     p_a = PCPolygon(v0=np.array([640, 200]),
                 v1=np.array([300, 480]),
                 v2=np.array([100, 100]),
-                depth=0,
                 color=COLOR_BLUE,
                 enable=False)
 
     p_b = PCPolygon(v0=np.array([220, 20]),
                 v1=np.array([110, 300]),
                 v2=np.array([10, 30]),
-                depth=4,
                 color=COLOR_GREEN,
                 enable=True)
 
@@ -380,7 +366,7 @@ async def test_polygon_b(dut):
         gen_img.save(SAVED_IMAGE_PATH + 'gen_poly_b_test.png')
 
     # Check error
-    error = np.absolute(gt_arr - gen_arr).mean()
+    error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
     dut._log.info("Poly B test error is " + str(error))
     if error > 0.2:
         assert 1 == 0

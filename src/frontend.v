@@ -38,7 +38,6 @@ module tt_um_emern_frontend (
     output [11:0] v1_y_out, // Packed polygon v1 y
     output [13:0] v2_x_out, // Packed polygon v2 x
     output [11:0] v2_y_out, // Packed polygon v2 y
-    output [5:0] poly_depth_out, // Packed polygon depth
     output [1:0] poly_enable_out // Enable polygons individually
 );
 
@@ -54,7 +53,6 @@ module tt_um_emern_frontend (
     reg [5:0] poly_a_v0_y;
     reg [5:0] poly_a_v1_y;
     reg [5:0] poly_a_v2_y;
-    reg [2:0] poly_a_depth;
 
     // Polygon B
     reg [5:0] poly_b_color;
@@ -64,11 +62,10 @@ module tt_um_emern_frontend (
     reg [5:0] poly_b_v0_y;
     reg [5:0] poly_b_v1_y;
     reg [5:0] poly_b_v2_y;
-    reg [2:0] poly_b_depth;
 
-    // SPI data - TODO: MISO support
-    reg [55:0] spi_buf_reversed;
-    wire [55:0] spi_buf;
+    // SPI data
+    reg [52:0] spi_buf_reversed;
+    wire [52:0] spi_buf;
     reg [5:0] spi_counter;
     reg [2:0] sck_buf;
     reg [1:0] cs_buf;
@@ -103,7 +100,7 @@ module tt_um_emern_frontend (
             // Optionally, SPI communication is allowed when the display is turned off
             // Also do not update the spi buffer or counter once the buffer has been filled
             spi_counter <= spi_complete ? 6'd0 : (spi_counter + 1'b1);
-            spi_buf_reversed <= {spi_buf_reversed[54:0], mosi};
+            spi_buf_reversed <= {spi_buf_reversed[51:0], mosi};
         end
     end
 
@@ -115,14 +112,14 @@ module tt_um_emern_frontend (
     wire cs = cs_buf[1];
 
     // All CMDS are CMD byte + 6 byte payload
-    // SPI transfer is complete after 56 bits are finalized
-    wire spi_complete = (spi_counter == 6'b111000);
+    // SPI transfer is complete after 53 bits are finalized
+    wire spi_complete = (spi_counter == 6'b110101);
 
     // Actual SPI buffer is the reversed version of the full bus since host processor streams data with LSB first
     genvar i;
     generate
-        for (i=0; i<56; i=i+1) begin: reverse
-            assign spi_buf[i]=spi_buf_reversed[56-i-1];
+        for (i=0; i<53; i=i+1) begin: reverse
+            assign spi_buf[i]=spi_buf_reversed[53-i-1];
         end
     endgenerate
 
@@ -142,7 +139,6 @@ module tt_um_emern_frontend (
             poly_a_v0_y <= 0;
             poly_a_v1_y <= 0;
             poly_a_v2_y <= 0;
-            poly_a_depth <= 0;
             poly_b_color <= 0;
             poly_b_v0_x <= 0;
             poly_b_v1_x <= 0;
@@ -150,7 +146,6 @@ module tt_um_emern_frontend (
             poly_b_v0_y <= 0;
             poly_b_v1_y <= 0;
             poly_b_v2_y <= 0;
-            poly_b_depth <= 0;
         end
         else if (spi_complete == 1'b1) begin
             case(spi_cmd)
@@ -163,7 +158,6 @@ module tt_um_emern_frontend (
                     poly_a_v0_y <= spi_buf[40:35];
                     poly_a_v1_y <= spi_buf[46:41];
                     poly_a_v2_y <= spi_buf[52:47];
-                    poly_a_depth <= spi_buf[55:53];
                     poly_en[0] <= 1'b1;
                 end
                 `SPI_CMD_CLEAR_POLY_A: begin
@@ -174,7 +168,6 @@ module tt_um_emern_frontend (
                     poly_a_v0_y <= 0;
                     poly_a_v1_y <= 0;
                     poly_a_v2_y <= 0;
-                    poly_a_depth <= 0;
                     poly_en[0] <= 1'b0;
                 end
                 `SPI_CMD_WRITE_POLY_B: begin
@@ -186,7 +179,6 @@ module tt_um_emern_frontend (
                     poly_b_v0_y <= spi_buf[40:35];
                     poly_b_v1_y <= spi_buf[46:41];
                     poly_b_v2_y <= spi_buf[52:47];
-                    poly_b_depth <= spi_buf[55:53];
                     poly_en[1] <= 1'b1;
                 end
                 `SPI_CMD_CLEAR_POLY_B: begin
@@ -197,7 +189,6 @@ module tt_um_emern_frontend (
                     poly_b_v0_y <= 0;
                     poly_b_v1_y <= 0;
                     poly_b_v2_y <= 0;
-                    poly_b_depth <= 0;
                     poly_en[1] <= 1'b0;
                 end
                 `SPI_CMD_SET_BG_COLOR: begin
@@ -217,7 +208,6 @@ module tt_um_emern_frontend (
     assign v1_y_out = {poly_b_v1_y, poly_a_v1_y};
     assign v2_x_out = {poly_b_v2_x, poly_a_v2_x};
     assign v2_y_out = {poly_b_v2_y, poly_a_v2_y};
-    assign poly_depth_out = {poly_b_depth, poly_a_depth};
     assign poly_enable_out = poly_en;
 
 endmodule
