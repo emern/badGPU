@@ -677,8 +677,7 @@ async def test_send_bad_cmd(dut):
             assert dut.bg_color_out.value == 0
 
             # Both polygons should remain unchanged
-            check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-            check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+            check_poly_enable(dut, enable_a=0, enable_b=0)
 
             # Wait some clock cycles
             await ClockCycles(dut.clk, 5)
@@ -697,5 +696,5 @@ async def test_send_bad_cmd(dut):
     assert dut.bg_color_out.value == 0
 
     # Both Polys should have the correct data
-    check_poly_a(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17, enable=1)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_a(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17)
+    check_poly_enable(dut, enable_a=1, enable_b=0)
