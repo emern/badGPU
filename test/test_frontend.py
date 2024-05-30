@@ -32,32 +32,38 @@ async def reset_dut(dut):
     await ClockCycles(dut.clk, 1)
 
 
-def check_poly_a(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1_y: int, v2_y: int, enable: int):
+def check_poly_a(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1_y: int, v2_y: int):
     """
     Check polygon A stored output
     """
-    assert (dut.poly_enable_out.value.integer & 1) == enable
-    assert (dut.poly_color_out.value.integer & 63) == color
-    assert (dut.v0_x_out.value.integer & 127) == v0_x
-    assert (dut.v1_x_out.value.integer & 127) == v1_x
-    assert (dut.v2_x_out.value.integer & 127) == v2_x
-    assert (dut.v0_y_out.value.integer & 63) == v0_y
-    assert (dut.v1_y_out.value.integer & 63) == v1_y
-    assert (dut.v2_y_out.value.integer & 63) == v2_y
+    assert (dut.color_a.value.integer) == color
+    assert (dut.v0_x_a.value.integer) == v0_x
+    assert (dut.v1_x_a.value.integer) == v1_x
+    assert (dut.v2_x_a.value.integer) == v2_x
+    assert (dut.v0_y_a.value.integer) == v0_y
+    assert (dut.v1_y_a.value.integer) == v1_y
+    assert (dut.v2_y_a.value.integer) == v2_y
 
 
-def check_poly_b(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1_y: int, v2_y: int, enable: int):
+def check_poly_b(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1_y: int, v2_y: int):
     """
     Check polygon B stored output
     """
-    assert (dut.poly_enable_out.value.integer & 2) >> 1 == enable
-    assert (dut.poly_color_out.value.integer & (63 << 6)) >> 6 == color
-    assert (dut.v0_x_out.value.integer & (127 << 7)) >> 7 == v0_x
-    assert (dut.v1_x_out.value.integer & (127 << 7)) >> 7 == v1_x
-    assert (dut.v2_x_out.value.integer & (127 << 7)) >> 7== v2_x
-    assert (dut.v0_y_out.value.integer & (63 << 6)) >> 6 == v0_y
-    assert (dut.v1_y_out.value.integer & (63 << 6)) >> 6 == v1_y
-    assert (dut.v2_y_out.value.integer & (63 << 6)) >> 6 == v2_y
+    assert (dut.color_b.value.integer) == color
+    assert (dut.v0_x_b.value.integer) == v0_x
+    assert (dut.v1_x_b.value.integer) == v1_x
+    assert (dut.v2_x_b.value.integer) == v2_x
+    assert (dut.v0_y_b.value.integer) == v0_y
+    assert (dut.v1_y_b.value.integer) == v1_y
+    assert (dut.v2_y_b.value.integer) == v2_y
+
+
+def check_poly_enable(dut, enable_a: int, enable_b: int):
+    """
+    Check if polygon A is enabled
+    """
+    assert (dut.poly_enable_out.value.integer & 1) == enable_a
+    assert (dut.poly_enable_out.value.integer & 2) >> 1 == enable_b
 
 
 @cocotb.test()
@@ -74,15 +80,8 @@ async def test_reset(dut):
     await reset_dut(dut)
     dut.en_load.value = 1
 
-    # All outputs should be zeroed
+    # Only the background color and polygon enable should be zeroed
     assert dut.bg_color_out.value == 0
-    assert dut.poly_color_out.value == 0
-    assert dut.v0_x_out.value == 0
-    assert dut.v0_y_out.value == 0
-    assert dut.v1_x_out.value == 0
-    assert dut.v1_y_out.value == 0
-    assert dut.v2_x_out.value == 0
-    assert dut.v2_y_out.value == 0
     assert dut.poly_enable_out.value == 0
 
     dut._log.info("Finished")
@@ -121,8 +120,8 @@ async def test_send_write_poly_a_cmd(dut):
     assert dut.bg_color_out.value == 0
 
     # Polygon A should have correct changes and polygon B should remain unchanged
-    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6, enable=1)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+    check_poly_enable(dut, enable_a=1, enable_b=0)
 
 
 
@@ -158,8 +157,8 @@ async def test_send_write_poly_b_cmd(dut):
     assert dut.bg_color_out.value == 0
 
     # Only polygon B should update
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6, enable=1)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
+    check_poly_b(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
 
 
 
@@ -195,8 +194,8 @@ async def test_send_write_poly_a_then_b(dut):
     assert dut.bg_color_out.value == 0
 
     # Polygon A should have correct changes and polygon B should remain unchanged
-    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6, enable=1)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+    check_poly_enable(dut, enable_a=1, enable_b=0)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 5)
@@ -215,8 +214,9 @@ async def test_send_write_poly_a_then_b(dut):
     assert dut.bg_color_out.value == 0
 
     # Both Polys should have the correct data
-    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6, enable=1)
-    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17, enable=1)
+    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17)
+    check_poly_enable(dut, enable_a=1, enable_b=1)
 
 
 
@@ -252,8 +252,8 @@ async def test_send_write_poly_b_then_a(dut):
     assert dut.bg_color_out.value == 0
 
     # Both Polys should have the correct data
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17, enable=1)
+    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 5)
@@ -271,8 +271,9 @@ async def test_send_write_poly_b_then_a(dut):
     # Background and screen enable CMDs should not have changed
     assert dut.bg_color_out.value == 0
 
-    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6, enable=1)
-    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17, enable=1)
+    check_poly_a(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+    check_poly_b(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17)
+    check_poly_enable(dut, enable_a=1, enable_b=1)
 
 
 
@@ -308,8 +309,8 @@ async def test_send_delete_poly_a(dut):
     assert dut.bg_color_out.value == 0
 
     # Both Polys should have the correct data
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 5)
@@ -327,8 +328,9 @@ async def test_send_delete_poly_a(dut):
     # Background and screen enable CMDs should not have changed
     assert dut.bg_color_out.value == 0
 
-    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=1, enable_b=1)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 6)
@@ -347,8 +349,9 @@ async def test_send_delete_poly_a(dut):
     assert dut.bg_color_out.value == 0
 
     # Only polygon A should be deleted
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
 
 
 
@@ -384,8 +387,8 @@ async def test_send_delete_poly_b(dut):
     assert dut.bg_color_out.value == 0
 
     # Both Polys should have the correct data
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 5)
@@ -403,8 +406,9 @@ async def test_send_delete_poly_b(dut):
     # Background and screen enable CMDs should not have changed
     assert dut.bg_color_out.value == 0
 
-    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=1, enable_b=1)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 6)
@@ -423,8 +427,9 @@ async def test_send_delete_poly_b(dut):
     assert dut.bg_color_out.value == 0
 
     # Only polygon B should be deleted
-    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0)
+    check_poly_enable(dut, enable_a=1, enable_b=0)
 
 
 
@@ -461,8 +466,7 @@ async def test_send_enable_load(dut):
     assert dut.bg_color_out.value == 0
 
     # All polygons should be clear
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_enable(dut, enable_a=0, enable_b=0)
 
     # Wait some clock cycles
     await ClockCycles(dut.clk, 1)
@@ -482,8 +486,9 @@ async def test_send_enable_load(dut):
     assert dut.bg_color_out.value == 0
 
     # New polygon data should be present
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+    check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+    check_poly_enable(dut, enable_a=0, enable_b=1)
+
 
 
 @cocotb.test()
@@ -518,8 +523,7 @@ async def test_send_background(dut):
     assert dut.bg_color_out.value == shared.COLOR_RED
 
     # All polygons should be clear
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_enable(dut, enable_a=0, enable_b=0)
 
     # Wait a small amount before sending the command
     await Timer(50, units='ns')
@@ -538,8 +542,7 @@ async def test_send_background(dut):
     assert dut.bg_color_out.value == shared.COLOR_GREEN
 
     # All polygons should be clear
-    check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
-    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+    check_poly_enable(dut, enable_a=0, enable_b=0)
 
 
 
@@ -577,8 +580,8 @@ async def test_write_many_polygons(dut):
 
 
         # Polygon A should be updated
-        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-        check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+        check_poly_enable(dut, enable_a=1, enable_b=0)
 
         # Wait some random and short number of clock cycles
         n_clk = random.randrange(start=2, stop=15, step=1)
@@ -600,8 +603,9 @@ async def test_write_many_polygons(dut):
 
 
         # Polygon B should be updated
-        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-        check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+        check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+        check_poly_enable(dut, enable_a=1, enable_b=1)
 
         # Wait some random and short number of clock cycles
         n_clk = random.randrange(start=2, stop=15, step=1)
@@ -629,8 +633,9 @@ async def test_write_many_polygons(dut):
 
 
         # Polygon B should be updated
-        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y, enable=1)
-        check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y, enable=1)
+        check_poly_a(dut, color=cmd_a.color, v0_x=cmd_a.v0_x, v1_x=cmd_a.v1_x, v2_x=cmd_a.v2_x, v0_y=cmd_a.v0_y, v1_y=cmd_a.v1_y, v2_y=cmd_a.v2_y)
+        check_poly_b(dut, color=cmd_b.color, v0_x=cmd_b.v0_x, v1_x=cmd_b.v1_x, v2_x=cmd_b.v2_x, v0_y=cmd_b.v0_y, v1_y=cmd_b.v1_y, v2_y=cmd_b.v2_y)
+        check_poly_enable(dut, enable_a=1, enable_b=1)
 
         # Wait some random and short number of clock cycles
         n_clk = random.randrange(start=2, stop=15, step=1)

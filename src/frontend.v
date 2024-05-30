@@ -50,27 +50,27 @@ module tt_um_emern_frontend (
     reg [`WPX-1:0] poly_a_v0_x;
     reg [`WPX-1:0] poly_a_v1_x;
     reg [`WPX-1:0] poly_a_v2_x;
-    reg [`WPX-1:0] poly_a_v0_y;
-    reg [`WPX-1:0] poly_a_v1_y;
-    reg [`WPX-1:0] poly_a_v2_y;
+    reg [`WPY-1:0] poly_a_v0_y;
+    reg [`WPY-1:0] poly_a_v1_y;
+    reg [`WPY-1:0] poly_a_v2_y;
 
     // Polygon B
     reg [`WCOLOR-1:0] poly_b_color;
     reg [`WPX-1:0] poly_b_v0_x;
     reg [`WPX-1:0] poly_b_v1_x;
     reg [`WPX-1:0] poly_b_v2_x;
-    reg [`WPX-1:0] poly_b_v0_y;
-    reg [`WPX-1:0] poly_b_v1_y;
-    reg [`WPX-1:0] poly_b_v2_y;
+    reg [`WPY-1:0] poly_b_v0_y;
+    reg [`WPY-1:0] poly_b_v1_y;
+    reg [`WPY-1:0] poly_b_v2_y;
 
     // Polygon C
     reg [`WCOLOR-1:0] poly_c_color;
     reg [`WPX-1:0] poly_c_v0_x;
     reg [`WPX-1:0] poly_c_v1_x;
     reg [`WPX-1:0] poly_c_v2_x;
-    reg [`WPX-1:0] poly_c_v0_y;
-    reg [`WPX-1:0] poly_c_v1_y;
-    reg [`WPX-1:0] poly_c_v2_y;
+    reg [`WPY-1:0] poly_c_v0_y;
+    reg [`WPY-1:0] poly_c_v1_y;
+    reg [`WPY-1:0] poly_c_v2_y;
 
 
     // SPI data
