@@ -635,3 +635,62 @@ async def test_write_many_polygons(dut):
         # Wait some random and short number of clock cycles
         n_clk = random.randrange(start=2, stop=15, step=1)
         await ClockCycles(dut.clk, n_clk)
+
+
+@cocotb.test()
+async def test_send_bad_cmd(dut):
+    """
+    Test writing a bad command to the SPI handler
+    """
+
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 40, units="ns") # Main clock is 25Mhz to match VGA
+    cocotb.start_soon(clock.start())
+
+    # Reset - Since the screen has been fully disabled, we should be able to write commands
+    await reset_dut(dut)
+    dut.en_load.value = 1
+
+    # Wait a small amount before sending the command
+    await Timer(1, units='ns')
+
+    # Send all possible invalid cmd bytes
+    for bad_cmd in range(256):
+        if SPIcmd.is_cmd_valid(bad_cmd) == False:
+            # Send command to polygon A with bad CMD parameter
+            cmd_a = SPIcmd(cmd=bad_cmd, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+
+            # Send command
+            await send_spi_cmd(dut.cs_in, dut.sck_in, dut.mosi_in, cmd=cmd_a)
+
+            # Wait 1 clock cycle on DUT side
+            await ClockCycles(dut.clk, 1)
+            await Timer(1, units='ns')
+
+            # Background and screen enable CMDs should not have changed
+            assert dut.bg_color_out.value == 0
+
+            # Both polygons should remain unchanged
+            check_poly_a(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+            check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
+
+            # Wait some clock cycles
+            await ClockCycles(dut.clk, 5)
+
+    # Now write a real command to poly A
+    cmd_a = SPIcmd(cmd=shared.SPI_CMD_WRITE_POLY_A, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17)
+
+    # Send command
+    await send_spi_cmd(dut.cs_in, dut.sck_in, dut.mosi_in, cmd=cmd_a)
+
+    # Wait 1 clock cycle on DUT side
+    await ClockCycles(dut.clk, 5)
+    await Timer(1, units='ns')
+
+    # Background and screen enable CMDs should not have changed
+    assert dut.bg_color_out.value == 0
+
+    # Both Polys should have the correct data
+    check_poly_a(dut, color=shared.COLOR_RED, v0_x=40, v0_y=12, v2_x=22, v1_x=11, v1_y=14, v2_y=17, enable=1)
+    check_poly_b(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0, enable=0)
