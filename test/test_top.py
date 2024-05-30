@@ -55,22 +55,18 @@ class VGAScreen:
             # Little hack here, if we split this time up a little bit it guarantees we run the code below when using even 40ns clock period
             await Timer(19, units='ns')
 
-            # Update internal position counter
-            self.pos_x += 1
-            if self.pos_x == 800:
-                self.pos_x = 0
-                self.pos_y += 1
-
-            if self.pos_y == 525:
-                self.pos_y = 0
-
-            # Reset internal counter if we are resetting
-            if self.dut.rst_n.value == 0:
-                self.pos_y = 0
-                self.pos_x = 0
-
             # Only assert after master reset since gate level simulation will have undefined value
             if self.has_been_reset == True:
+
+                # Update internal position counter
+                self.pos_x += 1
+                if self.pos_x == 800:
+                    self.pos_x = 0
+                    self.pos_y += 1
+
+                if self.pos_y == 525:
+                    self.pos_y = 0
+
                 # Check HSYNC signal
                 if self.pos_x >= 656 and self.pos_x <= 751:
                     assert self.dut.hsync.value == 0
@@ -126,6 +122,11 @@ class VGAScreen:
                     else:
                         # Background color
                         self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
+
+            else:
+                # Reset internal counter
+                self.pos_y = 0
+                self.pos_x = 0
 
             # Round the clock cycle to 40ns
             await Timer(1, units='ns')
@@ -228,6 +229,7 @@ async def reset_device(dut, screen: VGAScreen):
     dut.rst_n.value = 0
     await Timer(calc_cycles(10), units='ns')
     dut.rst_n.value = 1
+    await Timer(calc_cycles(1), units='ns')
     screen.has_been_reset = True
 
 

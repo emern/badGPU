@@ -43,10 +43,12 @@ module tt_um_emern_top (
   wire miso;
   wire cmd_enable;
 
+  reg rst_n_reg;
+
   // VGA handles timing of pixels w/monitor
   tt_um_emern_vga vga (
     .clk(clk),
-    .rst_n(rst_n),
+    .rst_n(rst_n_reg),
     .h_sync(h_sync),
     .v_sync(v_sync),
     .row_counter(row_counter),
@@ -58,7 +60,7 @@ module tt_um_emern_top (
   // Frontend handles SPI transfers and logic
   tt_um_emern_frontend frontend (
     .clk(clk),
-    .rst_n(rst_n),
+    .rst_n(rst_n_reg),
 
     // SPI params
     .cs_in(uio_in[0]),
@@ -82,7 +84,7 @@ module tt_um_emern_top (
   // Pixel core drives all rasterization logic and has internal state
   tt_um_emern_pixel_core pixel_core (
     .clk(clk),
-    .rst_n(rst_n),
+    .rst_n(rst_n_reg),
     .cmp_en(cmp_en), // Enable polygon rasterization (one-hot encoded)
     .pixel_row(row_counter[8:0]), // Current pixel row location - only care about the first 479 counts
     .pixel_col(col_counter), // Current pixel column location
@@ -97,5 +99,10 @@ module tt_um_emern_top (
 
     .pixel_out(pixel_out) // Output color for that pixel, r1r0g1g0b1b0
   );
+
+
+  always @(posedge clk) begin
+    rst_n_reg <= rst_n;
+  end
 
 endmodule
