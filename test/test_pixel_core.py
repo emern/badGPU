@@ -39,12 +39,12 @@ def set_polygon_a(dut, poly: PCPolygon):
     """
 
     # Set vertices
-    dut.v0_x_a.value = int(poly.v0[0] / 10)
-    dut.v0_y_a.value = int(poly.v0[1] / 10)
-    dut.v1_x_a.value = int(poly.v1[0] / 10)
-    dut.v1_y_a.value = int(poly.v1[1] / 10)
-    dut.v2_x_a.value = int(poly.v2[0] / 10)
-    dut.v2_y_a.value = int(poly.v2[1] / 10)
+    dut.v0_x_a.value = int(poly.v0[0] / 8)
+    dut.v0_y_a.value = int(poly.v0[1] / 8)
+    dut.v1_x_a.value = int(poly.v1[0] / 8)
+    dut.v1_y_a.value = int(poly.v1[1] / 8)
+    dut.v2_x_a.value = int(poly.v2[0] / 8)
+    dut.v2_y_a.value = int(poly.v2[1] / 8)
 
     # Set color
     dut.poly_color_a.value = poly.raw_color
@@ -62,12 +62,12 @@ def set_polygon_b(dut, poly: PCPolygon):
     """
 
     # Set vertices
-    dut.v0_x_b.value = int(poly.v0[0] / 10)
-    dut.v0_y_b.value = int(poly.v0[1] / 10)
-    dut.v1_x_b.value = int(poly.v1[0] / 10)
-    dut.v1_y_b.value = int(poly.v1[1] / 10)
-    dut.v2_x_b.value = int(poly.v2[0] / 10)
-    dut.v2_y_b.value = int(poly.v2[1] / 10)
+    dut.v0_x_b.value = int(poly.v0[0] / 8)
+    dut.v0_y_b.value = int(poly.v0[1] / 8)
+    dut.v1_x_b.value = int(poly.v1[0] / 8)
+    dut.v1_y_b.value = int(poly.v1[1] / 8)
+    dut.v2_x_b.value = int(poly.v2[0] / 8)
+    dut.v2_y_b.value = int(poly.v2[1] / 8)
 
     # Set color
     dut.poly_color_b.value = poly.raw_color

@@ -7,14 +7,10 @@
 
 `default_nettype none
 
-`define SPI_CMD_DEVICE_ID 8'h00 // TODO:
-
 `define SPI_CMD_WRITE_POLY_A 8'h80
 `define SPI_CMD_CLEAR_POLY_A 8'h40
 `define SPI_CMD_WRITE_POLY_B 8'h81
 `define SPI_CMD_CLEAR_POLY_B 8'h41
-`define SPI_CMD_ENABLE_SCREEN 8'h21
-`define SPI_CMD_DISABLE_SCREEN 8'h20
 `define SPI_CMD_SET_BG_COLOR 8'h01
 
 
