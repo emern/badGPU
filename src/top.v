@@ -4,6 +4,7 @@
  */
 
 `default_nettype none
+`include "constants.v"
 
 module tt_um_emern_top (
     input  wire [7:0] ui_in,    // Dedicated inputs
@@ -25,15 +26,15 @@ module tt_um_emern_top (
   wire [9:0] row_counter;
   wire [9:0] col_counter;
 
-  wire [1:0] cmp_en;
-  wire [5:0] background_color;
-  wire [11:0] poly_color;
-  wire [13:0] v0_x;
-  wire [11:0] v0_y;
-  wire [13:0] v1_x;
-  wire [11:0] v1_y;
-  wire [13:0] v2_x;
-  wire [11:0] v2_y;
+  wire [`N_POLY-1:0] cmp_en;
+  wire [`WCOLOR-1:0] background_color;
+  wire [`WCOLOR*`N_POLY-1:0] poly_color;
+  wire [`WPX*`N_POLY-1:0] v0_x;
+  wire [`WPY*`N_POLY-1:0] v0_y;
+  wire [`WPX*`N_POLY-1:0] v1_x;
+  wire [`WPY*`N_POLY-1:0] v1_y;
+  wire [`WPX*`N_POLY-1:0] v2_x;
+  wire [`WPY*`N_POLY-1:0] v2_y;
   wire [5:0] pixel_out;
   wire [5:0] pixel_out_gated;
   wire screen_inactive;
