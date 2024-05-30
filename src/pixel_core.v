@@ -21,7 +21,6 @@ module tt_um_emern_pixel_core (
     input [11:0] v1_y, // Packed polygon v1_y
     input [13:0] v2_x, // Packed polygon v2_x
     input [11:0] v2_y, // Packed polygon v2_y
-    input [5:0] poly_depth, // Packed polygon depth
 
     output [5:0] pixel_out // Output color for that pixel, rrggbb
 );
@@ -65,32 +64,21 @@ module tt_um_emern_pixel_core (
         end
 
         // Rasterize pixel
-        else if (|cmp_en == 1'b1) begin
-            // Only A is requesting rasterization
-            if ((rasterize_a_gated == 1'b1) && (rasterize_b_gated == 1'b0)) begin
-                cur_pixel <= poly_color[5:0];
-            end
-            // Only B is requesting rasterization
-            else if ((rasterize_a_gated == 1'b0) && (rasterize_b_gated == 1'b1)) begin
-                cur_pixel <= poly_color[11:6];
-            end
-            // No rasterization is requested
-            else if (((rasterize_a_gated == 1'b0) && (rasterize_b_gated == 1'b0))) begin
-                cur_pixel <= background_color;
-            end
-            // Both triangles should be rasterized, choose the one with the smallest depth
-            else begin
-                if (poly_depth[5:3] > poly_depth[2:0]) begin
+        else begin
+            casez({rasterize_a_gated, rasterize_b_gated})
+                2'b00: begin
+                    // No polygon should be rasterized
+                    cur_pixel <= background_color;
+                end
+                2'b1?: begin
+                    // Polygon A is requesting, this is the "closest" polygon
                     cur_pixel <= poly_color[5:0];
                 end
-                else begin
+                2'b01: begin
+                    // Polygon B is requesting, this is the "furthest" polygon and should be rasterized in last priority
                     cur_pixel <= poly_color[11:6];
                 end
-            end
-        end
-
-        else begin
-            cur_pixel <= background_color;
+            endcase
         end
     end
 

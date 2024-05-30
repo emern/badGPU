@@ -30,12 +30,11 @@ class Polygon:
     """
     Structure to hold polygon params
     """
-    def __init__(self, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, depth: int, color: int):
+    def __init__(self, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, color: int):
         self.v0 = v0
         self.v1 = v1
         self.v2 = v2
         self.raw_color = color
-        self.depth = depth
 
         # Save as array for gt
         self.color = upscale_color(color)
@@ -54,8 +53,7 @@ class SPIcmd:
                         v2_x: int,
                         v0_y: int,
                         v1_y: int,
-                        v2_y: int,
-                        depth: int):
+                        v2_y: int):
 
         self.color = color
         self.v0_x = v0_x
@@ -64,8 +62,7 @@ class SPIcmd:
         self.v0_y = v0_y
         self.v1_y = v1_y
         self.v2_y = v2_y
-        self.depth = depth
-        self.cmd_str = (cmd) | (color << 8) | (v0_x << 14) | (v1_x << 21) | (v2_x << 28) | (v0_y << 35) | (v1_y << 41) | (v2_y << 47) | (depth << 53)
+        self.cmd_str = (cmd) | (color << 8) | (v0_x << 14) | (v1_x << 21) | (v2_x << 28) | (v0_y << 35) | (v1_y << 41) | (v2_y << 47)
 
     def as_bytes(self) -> bytes:
         """
@@ -92,10 +89,9 @@ class SPIcmd:
             v0_y = random.randrange(start=0, stop=64, step=1)
             v1_y = random.randrange(start=0, stop=64, step=1)
             v2_y = random.randrange(start=0, stop=64, step=1)
-            depth = random.randrange(start=0, stop=8, step=1)
-            return cls(cmd, color, v0_x, v1_x, v2_x, v0_y, v1_y, v2_y, depth)
+            return cls(cmd, color, v0_x, v1_x, v2_x, v0_y, v1_y, v2_y)
         else:
-            return cls(cmd, 0, 0, 0, 0, 0, 0, 0, 0)
+            return cls(cmd, 0, 0, 0, 0, 0, 0, 0)
 
     @classmethod
     def from_poly(cls, poly: Polygon, cmd: int):
@@ -103,7 +99,7 @@ class SPIcmd:
         Create SPI CMD from a polygon struct
         """
         return cls(cmd, poly.raw_color, int(poly.v0[0]/10), int(poly.v1[0]/10), int(poly.v2[0]/10), int(poly.v0[1]/10),
-                                                                    int(poly.v1[1]/10), int(poly.v2[1]/10), poly.depth)
+                                                                    int(poly.v1[1]/10), int(poly.v2[1]/10))
 
 
 async def manual_clock(in_sig, cycles: int, period_ns: int):

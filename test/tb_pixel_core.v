@@ -40,9 +40,6 @@ module tb_pixel_core ();
   reg [5:0] poly_color_a;
   reg [5:0] poly_color_b;
 
-  reg [2:0] poly_depth_a;
-  reg [2:0] poly_depth_b;
-
   reg en_a;
   reg en_b;
 
@@ -55,7 +52,6 @@ module tb_pixel_core ();
   wire [11:0] v2_y = {v2_y_b, v2_y_a};
   wire [11:0] poly_color = {poly_color_b, poly_color_a};
   wire [1:0] cmp_en = {en_b, en_a};
-  wire [5:0] poly_depth = {poly_depth_b, poly_depth_a};
 
 
   // Device under test
@@ -73,8 +69,6 @@ module tb_pixel_core ();
     .v1_y(v1_y), // Packed polygon v1_y
     .v2_x(v2_x), // Packed polygon v2_x
     .v2_y(v2_y), // Packed polygon v2_y
-    .poly_depth(poly_depth), // Packed polygon depth
-
     .pixel_out(pixel_out) // Output color for that pixel, rrggbb
   );
 

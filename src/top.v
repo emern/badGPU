@@ -34,7 +34,6 @@ module tt_um_emern_top (
   wire [11:0] v1_y;
   wire [13:0] v2_x;
   wire [11:0] v2_y;
-  wire [5:0] poly_depth;
   wire [5:0] pixel_out;
   wire [5:0] pixel_out_gated;
   wire screen_inactive;
@@ -76,7 +75,6 @@ module tt_um_emern_top (
     .v1_y_out(v1_y), // Packed polygon v1 y
     .v2_x_out(v2_x), // Packed polygon v2 x
     .v2_y_out(v2_y), // Packed polygon v2 y
-    .poly_depth_out(poly_depth), // Packed polygon depth
     .poly_enable_out(cmp_en) // Enable polygons individually
 );
 
@@ -95,7 +93,6 @@ module tt_um_emern_top (
     .v1_y(v1_y), // Packed polygon v1_y
     .v2_x(v2_x), // Packed polygon v2_x
     .v2_y(v2_y), // Packed polygon v2_y
-    .poly_depth(poly_depth), // Packed polygon depth
 
     .pixel_out(pixel_out) // Output color for that pixel, r1r0g1g0b1b0
   );
