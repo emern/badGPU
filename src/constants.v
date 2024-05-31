@@ -8,4 +8,4 @@
 `define WPX 7
 `define WPY 6
 `define WCOLOR 6
-`define N_POLY 3
+`define N_POLY 4

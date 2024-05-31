@@ -59,6 +59,15 @@ module tb_frontend ();
   wire [`WPY-1:0] v2_y_c = v2_y_out[`WPY*3-1:`WPY*2];
   wire [`WCOLOR-1:0] color_c = poly_color_out[`WCOLOR*3-1:`WCOLOR*2];
 
+  // Unpack polygon D outputs
+  wire [`WPX-1:0] v0_x_d = v0_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPX-1:0] v1_x_d = v1_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPX-1:0] v2_x_d = v2_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPY-1:0] v0_y_d = v0_y_out[`WPY*4-1:`WPY*3];
+  wire [`WPY-1:0] v1_y_d = v1_y_out[`WPY*4-1:`WPY*3];
+  wire [`WPY-1:0] v2_y_d = v2_y_out[`WPY*4-1:`WPY*3];
+  wire [`WCOLOR-1:0] color_d = poly_color_out[`WCOLOR*4-1:`WCOLOR*3];
+
   tt_um_emern_frontend user_project (
     .clk(clk),
     .rst_n(rst_n),
