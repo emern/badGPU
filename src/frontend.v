@@ -254,12 +254,12 @@ module tt_um_emern_frontend (
     // Output assignment
     assign bg_color_out = bg_color;
     assign poly_color_out = {poly_d_color, poly_c_color, poly_b_color, poly_a_color};
-    assign v0_x_out = {poly_d_color, poly_c_v0_x, poly_b_v0_x, poly_a_v0_x};
-    assign v0_y_out = {poly_d_color, poly_c_v0_y, poly_b_v0_y, poly_a_v0_y};
-    assign v1_x_out = {poly_d_color, poly_c_v1_x, poly_b_v1_x, poly_a_v1_x};
-    assign v1_y_out = {poly_d_color, poly_c_v1_y, poly_b_v1_y, poly_a_v1_y};
-    assign v2_x_out = {poly_d_color, poly_c_v2_x, poly_b_v2_x, poly_a_v2_x};
-    assign v2_y_out = {poly_d_color, poly_c_v2_y, poly_b_v2_y, poly_a_v2_y};
+    assign v0_x_out = {poly_d_v0_x, poly_c_v0_x, poly_b_v0_x, poly_a_v0_x};
+    assign v0_y_out = {poly_d_v0_y, poly_c_v0_y, poly_b_v0_y, poly_a_v0_y};
+    assign v1_x_out = {poly_d_v1_x, poly_c_v1_x, poly_b_v1_x, poly_a_v1_x};
+    assign v1_y_out = {poly_d_v1_y, poly_c_v1_y, poly_b_v1_y, poly_a_v1_y};
+    assign v2_x_out = {poly_d_v2_x, poly_c_v2_x, poly_b_v2_x, poly_a_v2_x};
+    assign v2_y_out = {poly_d_v2_y, poly_c_v2_y, poly_b_v2_y, poly_a_v2_y};
     assign poly_enable_out = poly_en;
 
 endmodule
