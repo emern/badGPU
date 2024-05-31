@@ -1,4 +1,5 @@
 `default_nettype none
+`include "constants.v"
 `timescale 1ns / 1ps
 
 module tb_pixel_core ();
@@ -15,43 +16,51 @@ module tb_pixel_core ();
   reg rst_n;
   reg [8:0] pixel_row;
   reg [9:0] pixel_col;
-  reg [5:0] background_color;
-  reg [5:0] pixel_out;
+  reg [`WCOLOR-1:0] background_color;
+  reg [`WCOLOR-1:0] pixel_out;
 
   // Setable TB parameters, its easier to do the slicing here than with cocotb
-  reg [6:0] v0_x_a;
-  reg [6:0] v0_x_b;
+  reg [`WPX-1:0] v0_x_a;
+  reg [`WPX-1:0] v0_x_b;
+  reg [`WPX-1:0] v0_x_c;
 
-  reg [5:0] v0_y_a;
-  reg [5:0] v0_y_b;
+  reg [`WPY-1:0] v0_y_a;
+  reg [`WPY-1:0] v0_y_b;
+  reg [`WPY-1:0] v0_y_c;
 
-  reg [6:0] v1_x_a;
-  reg [6:0] v1_x_b;
+  reg [`WPX-1:0] v1_x_a;
+  reg [`WPX-1:0] v1_x_b;
+  reg [`WPX-1:0] v1_x_c;
 
-  reg [5:0] v1_y_a;
-  reg [5:0] v1_y_b;
+  reg [`WPY-1:0] v1_y_a;
+  reg [`WPY-1:0] v1_y_b;
+  reg [`WPY-1:0] v1_y_c;
 
-  reg [6:0] v2_x_a;
-  reg [6:0] v2_x_b;
+  reg [`WPX-1:0] v2_x_a;
+  reg [`WPX-1:0] v2_x_b;
+  reg [`WPX-1:0] v2_x_c;
 
-  reg [5:0] v2_y_a;
-  reg [5:0] v2_y_b;
+  reg [`WPY-1:0] v2_y_a;
+  reg [`WPY-1:0] v2_y_b;
+  reg [`WPY-1:0] v2_y_c;
 
-  reg [5:0] poly_color_a;
-  reg [5:0] poly_color_b;
+  reg [`WCOLOR-1:0] poly_color_a;
+  reg [`WCOLOR-1:0] poly_color_b;
+  reg [`WCOLOR-1:0] poly_color_c;
 
   reg en_a;
   reg en_b;
+  reg en_c;
 
   // Pack bus {a_params, b_params}
-  wire [13:0] v0_x = {v0_x_b, v0_x_a};
-  wire [11:0] v0_y = {v0_y_b, v0_y_a};
-  wire [13:0] v1_x = {v1_x_b, v1_x_a};
-  wire [11:0] v1_y = {v1_y_b, v1_y_a};
-  wire [13:0] v2_x = {v2_x_b, v2_x_a};
-  wire [11:0] v2_y = {v2_y_b, v2_y_a};
-  wire [11:0] poly_color = {poly_color_b, poly_color_a};
-  wire [1:0] cmp_en = {en_b, en_a};
+  wire [`WPX*`N_POLY-1:0] v0_x = {v0_x_c, v0_x_b, v0_x_a};
+  wire [`WPY*`N_POLY-1:0] v0_y = {v0_y_c, v0_y_b, v0_y_a};
+  wire [`WPX*`N_POLY-1:0] v1_x = {v1_x_c, v1_x_b, v1_x_a};
+  wire [`WPY*`N_POLY-1:0] v1_y = {v1_y_c, v1_y_b, v1_y_a};
+  wire [`WPX*`N_POLY-1:0] v2_x = {v2_x_c, v2_x_b, v2_x_a};
+  wire [`WPY*`N_POLY-1:0] v2_y = {v2_y_c, v2_y_b, v2_y_a};
+  wire [`WCOLOR*`N_POLY-1:0] poly_color = {poly_color_c, poly_color_b, poly_color_a};
+  wire [`N_POLY-1:0] cmp_en = {en_c, en_b, en_a};
 
 
   // Device under test

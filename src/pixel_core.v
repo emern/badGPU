@@ -5,22 +5,23 @@
 
 `default_nettype none
 
+`include "constants.v"
 `define BLACK_COLOR 6'b000000
 
 module tt_um_emern_pixel_core (
     input clk,
     input rst_n,
-    input [1:0] cmp_en, // Enable polygon rasterization (one-hot encoded)
+    input [`N_POLY-1:0] cmp_en, // Enable polygon rasterization (one-hot encoded)
     input [8:0] pixel_row, // Current pixel row location
     input [9:0] pixel_col, // Current pixel column location
-    input [5:0] background_color, // Background color to use when pixel is not within a triangle
-    input [11:0] poly_color, // Packed polygon color
-    input [13:0] v0_x, // Packed polygon v0_x
-    input [11:0] v0_y, // Packed polygon v0_y
-    input [13:0] v1_x, // Packed polygon v1_x
-    input [11:0] v1_y, // Packed polygon v1_y
-    input [13:0] v2_x, // Packed polygon v2_x
-    input [11:0] v2_y, // Packed polygon v2_y
+    input [`WCOLOR-1:0] background_color, // Background color to use when pixel is not within a triangle
+    input [`WCOLOR*`N_POLY-1:0] poly_color, // Packed polygon color
+    input [`WPX*`N_POLY-1:0] v0_x, // Packed polygon v0_x
+    input [`WPY*`N_POLY-1:0] v0_y, // Packed polygon v0_y
+    input [`WPX*`N_POLY-1:0] v1_x, // Packed polygon v1_x
+    input [`WPY*`N_POLY-1:0] v1_y, // Packed polygon v1_y
+    input [`WPX*`N_POLY-1:0] v2_x, // Packed polygon v2_x
+    input [`WPY*`N_POLY-1:0] v2_y, // Packed polygon v2_y
 
     output [5:0] pixel_out // Output color for that pixel, rrggbb
 );
@@ -53,6 +54,19 @@ module tt_um_emern_pixel_core (
     wire rasterize_b;
     wire rasterize_b_gated = rasterize_b & cmp_en[1];
 
+    // Unpack polygon C vertices
+    wire [6:0] v0_x_c = (v0_x[20:14]);
+    wire [5:0] v0_y_c = (v0_y[17:12]);
+
+    wire [6:0] v1_x_c = (v1_x[20:14]);
+    wire [5:0] v1_y_c = (v1_y[17:12]);
+
+    wire [6:0] v2_x_c = (v2_x[20:14]);
+    wire [5:0] v2_y_c = (v2_y[17:12]);
+
+    wire rasterize_c;
+    wire rasterize_c_gated = rasterize_c & cmp_en[2];
+
     assign pixel_out = cur_pixel;
 
     always @(posedge clk) begin
@@ -63,18 +77,22 @@ module tt_um_emern_pixel_core (
 
         // Rasterize pixel
         else begin
-            casez({rasterize_a_gated, rasterize_b_gated})
-                2'b00: begin
+            casez({rasterize_a_gated, rasterize_b_gated, rasterize_c_gated})
+                3'b000: begin
                     // No polygon should be rasterized
                     cur_pixel <= background_color;
                 end
-                2'b1?: begin
+                3'b1??: begin
                     // Polygon A is requesting, this is the "closest" polygon
                     cur_pixel <= poly_color[5:0];
                 end
-                2'b01: begin
-                    // Polygon B is requesting, this is the "furthest" polygon and should be rasterized in last priority
+                3'b01?: begin
+                    // Polygon B is requesting
                     cur_pixel <= poly_color[11:6];
+                end
+                3'b001: begin
+                    // Polygon C is requesting, this is the "furthest" polygon and should be rasterized in last priority
+                    cur_pixel <= poly_color[17:12];
                 end
             endcase
         end
@@ -110,6 +128,23 @@ module tt_um_emern_pixel_core (
         .v2_y(v2_y_b),
 
         .rasterize(rasterize_b)
+    );
+
+
+    // Rasterization of polygon C
+    tt_um_emern_raster_core rc_c (
+        .pixel_col(pixel_col),
+        .pixel_row(pixel_row),
+
+        .v0_x(v0_x_c),
+        .v1_x(v1_x_c),
+        .v2_x(v2_x_c),
+
+        .v0_y(v0_y_c),
+        .v1_y(v1_y_c),
+        .v2_y(v2_y_c),
+
+        .rasterize(rasterize_c)
     );
 
 endmodule

@@ -14,6 +14,8 @@ SPI_CMD_WRITE_POLY_A = 0x80
 SPI_CMD_CLEAR_POLY_A = 0x40
 SPI_CMD_WRITE_POLY_B = 0x81
 SPI_CMD_CLEAR_POLY_B = 0x41
+SPI_CMD_WRITE_POLY_C = 0x82
+SPI_CMD_CLEAR_POLY_C = 0x42
 SPI_CMD_SET_BG_COLOR = 0x01
 
 # Colors mapping
@@ -110,6 +112,10 @@ class SPIcmd:
         if cmd == SPI_CMD_WRITE_POLY_B:
             return True
         if cmd == SPI_CMD_CLEAR_POLY_B:
+            return True
+        if cmd == SPI_CMD_WRITE_POLY_C:
+            return True
+        if cmd == SPI_CMD_CLEAR_POLY_C:
             return True
         if cmd == SPI_CMD_SET_BG_COLOR:
             return True
