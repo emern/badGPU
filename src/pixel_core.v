@@ -78,7 +78,7 @@ module tt_um_emern_pixel_core (
     wire [5:0] v2_y_d = (v2_y[23:18]);
 
     wire rasterize_d;
-    wire rasterize_d_gated = rasterize_d & cmp_en[2];
+    wire rasterize_d_gated = rasterize_d & cmp_en[3];
 
     assign pixel_out = cur_pixel;
 
