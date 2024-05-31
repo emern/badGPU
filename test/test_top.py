@@ -353,15 +353,15 @@ async def test_empty_screen(dut):
 
 
 @cocotb.test()
-async def test_draw_poly_a(dut):
+async def test_draw_single_polygon_per_frame(dut):
     """
-    Test drawing polygon A
+    Test drawing a single polygon per frame
     """
     dut._log.info("Start")
 
     # Generate screen and start clock
     screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-    cocotb.start_soon(screen.clock())
+    clk = cocotb.start_soon(screen.clock())
 
     # Reset device
     await reset_device(dut, screen=screen)
@@ -391,48 +391,10 @@ async def test_draw_poly_a(dut):
     dut._log.info("Saving frame")
 
 
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_a')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-    dut._log.info("Clearing Polygon A")
-
-    # Clear poly A
-    await screen.clear_poly_a()
-
-    # Fill in the rest of the screen blanking period
-    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-    dut._log.info("Writing new frame")
-
-    # Generate the new visible frame
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-    # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_a_2')
-
-    # Check gt vs generated to 1%
-    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-@cocotb.test()
-async def test_draw_poly_b(dut):
-    """
-    Test drawing Polygon B
-    """
-    dut._log.info("Start")
-
-    # Generate screen and start clock
-    screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-    cocotb.start_soon(screen.clock())
-
-    # Reset device
-    await reset_device(dut, screen=screen)
-
-    # Run until we are at the hsync portion of drawing the screen
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     dut._log.info("Setting Polygon B")
 
@@ -456,49 +418,11 @@ async def test_draw_poly_b(dut):
     dut._log.info("Saving frame")
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_b')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_2')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
 
-
-    dut._log.info("Clearing Polygon B")
-
-    # Clear poly B
-    await screen.clear_poly_b()
-
-    # Fill in the rest of the screen blanking period
-    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-    dut._log.info("Writing new frame")
-
-    # Generate the new visible frame
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-    # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_b_2')
-
-    # Check gt vs generated to 1%
-    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-
-@cocotb.test()
-async def test_draw_poly_c(dut):
-    """
-    Test drawing polygon C
-    """
-    dut._log.info("Start")
-
-    # Generate screen and start clock
-    screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-    cocotb.start_soon(screen.clock())
-
-    # Reset device
-    await reset_device(dut, screen=screen)
-
-    # Run until we are at the hsync portion of drawing the screen
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     dut._log.info("Setting Polygon C")
 
@@ -522,49 +446,11 @@ async def test_draw_poly_c(dut):
     dut._log.info("Saving frame")
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_c')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_3')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
 
-    dut._log.info("Clearing Polygon C")
-
-    # Clear poly B
-    await screen.clear_poly_c()
-
-    # Fill in the rest of the screen blanking period
-    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-    dut._log.info("Writing new frame")
-
-    # Generate the new visible frame
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-    # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_c2')
-
-    # Check gt vs generated to 1%
-    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-    dut._log.info("Finished")
-
-
-@cocotb.test()
-async def test_draw_poly_d(dut):
-    """
-    Test drawing polygon D
-    """
-    dut._log.info("Start")
-
-    # Generate screen and start clock
-    screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-    clk = cocotb.start_soon(screen.clock())
-
-    # Reset device
-    await reset_device(dut, screen=screen)
-
-    # Run until we are at the hsync portion of drawing the screen
-    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     dut._log.info("Setting Polygon D")
 
@@ -587,10 +473,71 @@ async def test_draw_poly_d(dut):
     dut._log.info("Saving frame")
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_d')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_4')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
+
+    dut._log.info("Clearing Polygon A")
+
+    # Clear poly A
+    await screen.clear_poly_a()
+
+    # Fill in the rest of the screen blanking period
+    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
+
+    dut._log.info("Writing new frame")
+
+    # Generate the new visible frame
+    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
+
+    # Save new frame
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_5')
+
+    # Check gt vs generated to 1%
+    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
+
+    dut._log.info("Clearing Polygon B")
+
+    # Clear poly B
+    await screen.clear_poly_b()
+
+    # Fill in the rest of the screen blanking period
+    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
+
+    dut._log.info("Writing new frame")
+
+    # Generate the new visible frame
+    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
+
+    # Save new frame
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_6')
+
+    # Check gt vs generated to 1%
+    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
+
+    dut._log.info("Clearing Polygon C")
+
+    # Clear poly B
+    await screen.clear_poly_c()
+
+    # Fill in the rest of the screen blanking period
+    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
+
+    dut._log.info("Writing new frame")
+
+    # Generate the new visible frame
+    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
+
+    # Save new frame
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_7')
+
+    # Check gt vs generated to 1%
+    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
 
     dut._log.info("Clearing Polygon D")
 
@@ -606,221 +553,10 @@ async def test_draw_poly_d(dut):
     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_d2')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_8')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
 
     dut._log.info("Finished")
-
-
-# Note: This test runs out of memory on the gate level CI test :(
-# Needs to be run manually
-# @cocotb.test()
-# async def test_draw_single_polygon_per_frame(dut):
-#     """
-#     Test drawing a single polygon per frame
-#     """
-#     dut._log.info("Start")
-
-#     # Generate screen and start clock
-#     screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-#     clk = cocotb.start_soon(screen.clock())
-
-#     # Reset device
-#     await reset_device(dut, screen=screen)
-
-#     # Run until we are at the hsync portion of drawing the screen
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     dut._log.info("Setting Polygon A")
-
-#     # Polygon parameters
-#     p_a = Polygon(v0=[600, 0],
-#                 v1=[200, 410],
-#                 v2=[10, 10],
-#                 color=COLOR_RED)
-
-#     # Set polygons internally
-#     await screen.set_poly_a(poly=p_a)
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new frame with the polygon included
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     dut._log.info("Saving frame")
-
-
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_1')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-#     dut._log.info("Setting Polygon B")
-
-#     # Write a second polygon
-#     p_b = Polygon(v0=[100, 0],
-#                 v1=[50, 480],
-#                 v2=[1, 1],
-#                 color=COLOR_GREEN)
-
-#     # Set polygons internally
-#     await screen.set_poly_b(poly=p_b)
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new frame with the polygon included
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     dut._log.info("Saving frame")
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_2')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Setting Polygon C")
-
-#     # Write a second polygon
-#     p_c = Polygon(v0=[630, 200],
-#                 v1=[200, 180],
-#                 v2=[10, 10],
-#                 color=COLOR_BLUE)
-
-#     # Set polygons internally
-#     await screen.set_poly_c(poly=p_c)
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new frame with the polygon included
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     dut._log.info("Saving frame")
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_3')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Setting Polygon D")
-
-#     p_d = Polygon(v0=[200, 20],
-#                 v1=[100, 120],
-#                 v2=[100, 20],
-#                 color=COLOR_BLUE+COLOR_RED)
-
-#     # Set polygons internally
-#     await screen.set_poly_d(poly=p_d)
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new frame with the polygon included
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     dut._log.info("Saving frame")
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_4')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Clearing Polygon A")
-
-#     # Clear poly A
-#     await screen.clear_poly_a()
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new visible frame
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_5')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Clearing Polygon B")
-
-#     # Clear poly B
-#     await screen.clear_poly_b()
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new visible frame
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_6')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Clearing Polygon C")
-
-#     # Clear poly B
-#     await screen.clear_poly_c()
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new visible frame
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_7')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-
-#     dut._log.info("Clearing Polygon D")
-
-#     # Clear poly D
-#     await screen.clear_poly_d()
-
-#     # Fill in the rest of the screen blanking period
-#     await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
-
-#     dut._log.info("Writing new frame")
-
-#     # Generate the new visible frame
-#     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
-
-#     # Save new frame
-#     save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_8')
-
-#     # Check gt vs generated to 1%
-#     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-#     dut._log.info("Finished")
 
