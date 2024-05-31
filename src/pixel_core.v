@@ -90,7 +90,7 @@ module tt_um_emern_pixel_core (
 
         // Rasterize pixel
         else begin
-            casez({rasterize_a_gated, rasterize_b_gated, rasterize_c_gated})
+            casez({rasterize_a_gated, rasterize_b_gated, rasterize_c_gated, rasterize_d_gated})
                 4'b0000: begin
                     // No polygon should be rasterized
                     cur_pixel <= background_color;

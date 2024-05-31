@@ -44,7 +44,7 @@ module tt_um_emern_frontend (
 );
 
     // Stored polygon and screen data
-    reg [`WCOLOR:0] bg_color;
+    reg [`WCOLOR-1:0] bg_color;
     reg [`N_POLY-1:0] poly_en;
 
     // Polygon A
