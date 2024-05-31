@@ -58,12 +58,26 @@ def check_poly_b(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1
     assert (dut.v2_y_b.value.integer) == v2_y
 
 
-def check_poly_enable(dut, enable_a: int, enable_b: int):
+def check_poly_c(dut, color: int, v0_x: int, v1_x: int, v2_x: int, v0_y: int, v1_y: int, v2_y: int):
+    """
+    Check polygon C stored output
+    """
+    assert (dut.color_c.value.integer) == color
+    assert (dut.v0_x_c.value.integer) == v0_x
+    assert (dut.v1_x_c.value.integer) == v1_x
+    assert (dut.v2_x_c.value.integer) == v2_x
+    assert (dut.v0_y_c.value.integer) == v0_y
+    assert (dut.v1_y_c.value.integer) == v1_y
+    assert (dut.v2_y_c.value.integer) == v2_y
+
+
+def check_poly_enable(dut, enable_a: int, enable_b: int, enable_c=0):
     """
     Check if polygon A is enabled
     """
     assert (dut.poly_enable_out.value.integer & 1) == enable_a
     assert (dut.poly_enable_out.value.integer & 2) >> 1 == enable_b
+    assert (dut.poly_enable_out.value.integer & 4) >> 2 == enable_c
 
 
 @cocotb.test()
@@ -159,6 +173,83 @@ async def test_send_write_poly_b_cmd(dut):
     # Only polygon B should update
     check_poly_enable(dut, enable_a=0, enable_b=1)
     check_poly_b(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+
+
+@cocotb.test()
+async def test_send_write_poly_c_cmd(dut):
+    """
+    Test writing polygon C parameters
+    """
+
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 40, units="ns") # Main clock is 25Mhz to match VGA
+    cocotb.start_soon(clock.start())
+
+    # Reset - Since the screen has been fully disabled, we should be able to write commands
+    await reset_dut(dut)
+    dut.en_load.value = 1
+
+    # Wait a small amount before sending the command
+    await Timer(1, units='ns')
+
+    # Arbitrary cmd to ploygon C
+    new_cmd = SPIcmd(cmd=shared.SPI_CMD_WRITE_POLY_C, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+
+    # Send command
+    await send_spi_cmd(dut.cs_in, dut.sck_in, dut.mosi_in, cmd=new_cmd)
+
+    # Wait 1 clock cycle on DUT side
+    await ClockCycles(dut.clk, 1)
+    await Timer(1, units='ns')
+
+    # Background and screen enable CMDs should not have changed
+    assert dut.bg_color_out.value == 0
+
+    # Only polygon c should update
+    check_poly_enable(dut, enable_a=0, enable_b=0, enable_c=1)
+    check_poly_c(dut, color=shared.COLOR_GREEN, v0_x=1, v0_y=2, v2_x=3, v1_x=4, v1_y=5, v2_y=6)
+
+
+    # Wait 1 clock cycle on DUT side
+    await ClockCycles(dut.clk, 1)
+    await Timer(1, units='ns')
+
+
+    # Another arbitrary cmd to ploygon C
+    new_cmd = SPIcmd(cmd=shared.SPI_CMD_WRITE_POLY_C, color=shared.COLOR_RED, v0_x=6, v0_y=5, v2_x=4, v1_x=3, v1_y=2, v2_y=1)
+
+    # Send command
+    await send_spi_cmd(dut.cs_in, dut.sck_in, dut.mosi_in, cmd=new_cmd)
+
+    # Wait 1 clock cycle on DUT side
+    await ClockCycles(dut.clk, 1)
+    await Timer(1, units='ns')
+
+    # Background and screen enable CMDs should not have changed
+    assert dut.bg_color_out.value == 0
+
+    # Only polygon C should update
+    check_poly_enable(dut, enable_a=0, enable_b=0, enable_c=1)
+    check_poly_c(dut, color=shared.COLOR_RED, v0_x=6, v0_y=5, v2_x=4, v1_x=3, v1_y=2, v2_y=1)
+
+
+    # Clear
+    new_cmd = SPIcmd(cmd=shared.SPI_CMD_CLEAR_POLY_C, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0)
+
+    # Send command
+    await send_spi_cmd(dut.cs_in, dut.sck_in, dut.mosi_in, cmd=new_cmd)
+
+    # Wait 1 clock cycle on DUT side
+    await ClockCycles(dut.clk, 1)
+    await Timer(1, units='ns')
+
+    # Background and screen enable CMDs should not have changed
+    assert dut.bg_color_out.value == 0
+
+    # Only polygon C should clear
+    check_poly_enable(dut, enable_a=0, enable_b=0, enable_c=0)
+    check_poly_c(dut, color=0, v0_x=0, v0_y=0, v2_x=0, v1_x=0, v1_y=0, v2_y=0)
 
 
 
