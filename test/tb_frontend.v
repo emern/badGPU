@@ -59,6 +59,34 @@ module tb_frontend ();
   wire [`WPY-1:0] v2_y_c = v2_y_out[`WPY*3-1:`WPY*2];
   wire [`WCOLOR-1:0] color_c = poly_color_out[`WCOLOR*3-1:`WCOLOR*2];
 
+  // Unpack polygon D outputs
+  wire [`WPX-1:0] v0_x_d = v0_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPX-1:0] v1_x_d = v1_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPX-1:0] v2_x_d = v2_x_out[`WPX*4-1:`WPX*3];
+  wire [`WPY-1:0] v0_y_d = v0_y_out[`WPY*4-1:`WPY*3];
+  wire [`WPY-1:0] v1_y_d = v1_y_out[`WPY*4-1:`WPY*3];
+  wire [`WPY-1:0] v2_y_d = v2_y_out[`WPY*4-1:`WPY*3];
+  wire [`WCOLOR-1:0] color_d = poly_color_out[`WCOLOR*4-1:`WCOLOR*3];
+
+  // Unpack polygon E outputs
+  wire [`WPX-1:0] v0_x_e = v0_x_out[`WPX*5-1:`WPX*4];
+  wire [`WPX-1:0] v1_x_e = v1_x_out[`WPX*5-1:`WPX*4];
+  wire [`WPX-1:0] v2_x_e = v2_x_out[`WPX*5-1:`WPX*4];
+  wire [`WPY-1:0] v0_y_e = v0_y_out[`WPY*5-1:`WPY*4];
+  wire [`WPY-1:0] v1_y_e = v1_y_out[`WPY*5-1:`WPY*4];
+  wire [`WPY-1:0] v2_y_e = v2_y_out[`WPY*5-1:`WPY*4];
+  wire [`WCOLOR-1:0] color_e = poly_color_out[`WCOLOR*5-1:`WCOLOR*4];
+
+  // Unpack polygon F outputs
+  wire [`WPX-1:0] v0_x_f = v0_x_out[`WPX*6-1:`WPX*5];
+  wire [`WPX-1:0] v1_x_f = v1_x_out[`WPX*6-1:`WPX*5];
+  wire [`WPX-1:0] v2_x_f = v2_x_out[`WPX*6-1:`WPX*5];
+  wire [`WPY-1:0] v0_y_f = v0_y_out[`WPY*6-1:`WPY*5];
+  wire [`WPY-1:0] v1_y_f = v1_y_out[`WPY*6-1:`WPY*5];
+  wire [`WPY-1:0] v2_y_f = v2_y_out[`WPY*6-1:`WPY*5];
+  wire [`WCOLOR-1:0] color_f = poly_color_out[`WCOLOR*6-1:`WCOLOR*5];
+
+
   tt_um_emern_frontend user_project (
     .clk(clk),
     .rst_n(rst_n),

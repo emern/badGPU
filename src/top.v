@@ -35,8 +35,8 @@ module tt_um_emern_top (
   wire [`WPY*`N_POLY-1:0] v1_y;
   wire [`WPX*`N_POLY-1:0] v2_x;
   wire [`WPY*`N_POLY-1:0] v2_y;
-  wire [5:0] pixel_out;
-  wire [5:0] pixel_out_gated;
+  wire [`WCOLOR-1:0] pixel_out;
+  wire [`WCOLOR-1:0] pixel_out_gated;
   wire screen_inactive;
   wire h_sync;
   wire v_sync;
