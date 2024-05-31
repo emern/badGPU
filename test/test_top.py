@@ -390,7 +390,7 @@ async def test_draw_single_polygon_per_frame(dut):
     p_c = Polygon(v0=[630, 200],
                 v1=[200, 180],
                 v2=[10, 10],
-                color=COLOR_BLUE)
+                color=COLOR_BLUE) 
 
     # Set polygons internally
     await screen.set_poly_c(poly=p_c)
