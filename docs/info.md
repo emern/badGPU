@@ -9,7 +9,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-This project implements a GPU capable of rasterizing 3 triangles. It takes commands from any microcontroller via the SPI bus and draws them on screen at
+This project implements a GPU capable of rasterizing 4 triangles. It takes commands from any microcontroller via the SPI bus and draws them on screen at
 640x480 @60Hz. All colors are 6 bits in depth (i.e rrggbb), giving up to 64 unique colors. It can also set a unique background color of your choosing.
 
 
@@ -20,7 +20,7 @@ Triangles are supplied by their vertices. Note that not all vertex values are su
 
 ## How to test
 
-The device can draw up to 3 polygons, A, B, C at a time. Since there is no Z-buffer, polygon A can be thought of as "closest" to the viewer, B "second closest", etc. If there is a region where your set polygons overlap, A will be rasterized over B and so on.
+The device can draw up to 4 polygons, A, B, C, D at a time. Since there is no Z-buffer, polygon A can be thought of as "closest" to the viewer, B "second closest", etc. If there is a region where your set polygons overlap, A will be rasterized over B and so on.
 
 The "GPU" should be connected to the host microcontroller via SPI (tested with up to 4Mhz). Note that SPI communication here needs to be with LSB first formatting.
 During each frame there is a certain amount of time which is not used to display any image. Here, the GPU will assert the INT pin, telling the host microcontroller that it is able to send new commands via SPI.
@@ -40,6 +40,8 @@ Available Commands:
  - SPI_CMD_CLEAR_POLY_B = 0x41
  - SPI_CMD_WRITE_POLY_C = 0x82
  - SPI_CMD_CLEAR_POLY_C = 0x42
+ - SPI_CMD_WRITE_POLY_D = 0x83
+ - SPI_CMD_CLEAR_POLY_D = 0x43
  - SPI_CMD_SET_BG_COLOR = 0x01
 
 Note the SPI_CMD_SET_BG_COLOR command only utilizes the 6-bit 'Color' field, all other fields are ignored.
