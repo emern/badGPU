@@ -27,29 +27,33 @@ During each frame there is a certain amount of time which is not used to display
 
 ![image](SPI.png)
 
+Example SPI transfers initiated after INT pin asserted
+
 ### Command set
 
 Each SPI command contains a CMD byte along with 6 data bytes. The 6 data bytes are a packed bitfield with the following formatting:
 
 [CMD - 8 bit] + [Color(r0r1g0g1b0b1) - 6 bit][Vertex 0 X - 7 bit][Vertex 1 X - 7 bit][Vertex 2 X - 7 bit][Vertex 0 Y - 6 bit][Vertex 1 Y - 6 bit][Vertex 3 Y - 6 bit][Unused - 3 bits]
 
-Available Commands:
- - SPI_CMD_WRITE_POLY_A = 0x80
- - SPI_CMD_CLEAR_POLY_A = 0x40
- - SPI_CMD_WRITE_POLY_B = 0x81
- - SPI_CMD_CLEAR_POLY_B = 0x41
- - SPI_CMD_WRITE_POLY_C = 0x82
- - SPI_CMD_CLEAR_POLY_C = 0x42
- - SPI_CMD_WRITE_POLY_D = 0x83
- - SPI_CMD_CLEAR_POLY_D = 0x43
- - SPI_CMD_SET_BG_COLOR = 0x01
+Available Commands:\
+SPI_CMD_WRITE_POLY_A = 0x80 \
+SPI_CMD_CLEAR_POLY_A = 0x40 \
+SPI_CMD_WRITE_POLY_B = 0x81 \
+SPI_CMD_CLEAR_POLY_B = 0x41 \
+SPI_CMD_WRITE_POLY_C = 0x82 \
+SPI_CMD_CLEAR_POLY_C = 0x42 \
+SPI_CMD_WRITE_POLY_D = 0x83 \
+SPI_CMD_CLEAR_POLY_D = 0x43 \
+SPI_CMD_SET_BG_COLOR = 0x01 
 
 Note the SPI_CMD_SET_BG_COLOR command only utilizes the 6-bit 'Color' field, all other fields are ignored.
 
 ![image](SPI_example.png)
+Example command setting a blue triangle in the top left corner.
+
 
 ![image](triangles.jpg)
-
+Example of rendering 2 triangles + background color.
 
 ## External hardware
 
