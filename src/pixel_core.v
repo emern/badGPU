@@ -67,6 +67,19 @@ module tt_um_emern_pixel_core (
     wire rasterize_c;
     wire rasterize_c_gated = rasterize_c & cmp_en[2];
 
+    // Unpack polygon D vertices
+    wire [6:0] v0_x_d = (v0_x[27:21]);
+    wire [5:0] v0_y_d = (v0_y[23:18]);
+
+    wire [6:0] v1_x_d = (v1_x[27:21]);
+    wire [5:0] v1_y_d = (v1_y[23:18]);
+
+    wire [6:0] v2_x_d = (v2_x[27:21]);
+    wire [5:0] v2_y_d = (v2_y[23:18]);
+
+    wire rasterize_d;
+    wire rasterize_d_gated = rasterize_d & cmp_en[3];
+
     assign pixel_out = cur_pixel;
 
     always @(posedge clk) begin
@@ -77,22 +90,26 @@ module tt_um_emern_pixel_core (
 
         // Rasterize pixel
         else begin
-            casez({rasterize_a_gated, rasterize_b_gated, rasterize_c_gated})
-                3'b000: begin
+            casez({rasterize_a_gated, rasterize_b_gated, rasterize_c_gated, rasterize_d_gated})
+                4'b0000: begin
                     // No polygon should be rasterized
                     cur_pixel <= background_color;
                 end
-                3'b1??: begin
+                4'b1???: begin
                     // Polygon A is requesting, this is the "closest" polygon
                     cur_pixel <= poly_color[5:0];
                 end
-                3'b01?: begin
+                4'b01??: begin
                     // Polygon B is requesting
                     cur_pixel <= poly_color[11:6];
                 end
-                3'b001: begin
-                    // Polygon C is requesting, this is the "furthest" polygon and should be rasterized in last priority
+                4'b001?: begin
+                    // Polygon C is requesting
                     cur_pixel <= poly_color[17:12];
+                end
+                4'b0001: begin
+                    // Polygon D is requesting
+                    cur_pixel <= poly_color[23:18];
                 end
             endcase
         end
@@ -146,5 +163,22 @@ module tt_um_emern_pixel_core (
 
         .rasterize(rasterize_c)
     );
+
+    // Rasterization of polygon D
+    tt_um_emern_raster_core rc_d (
+        .pixel_col(pixel_col),
+        .pixel_row(pixel_row),
+
+        .v0_x(v0_x_d),
+        .v1_x(v1_x_d),
+        .v2_x(v2_x_d),
+
+        .v0_y(v0_y_d),
+        .v1_y(v1_y_d),
+        .v2_y(v2_y_d),
+
+        .rasterize(rasterize_d)
+    );
+
 
 endmodule

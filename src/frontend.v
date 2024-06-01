@@ -15,6 +15,8 @@
 `define SPI_CMD_CLEAR_POLY_B 8'h41
 `define SPI_CMD_WRITE_POLY_C 8'h82
 `define SPI_CMD_CLEAR_POLY_C 8'h42
+`define SPI_CMD_WRITE_POLY_D 8'h83
+`define SPI_CMD_CLEAR_POLY_D 8'h43
 `define SPI_CMD_SET_BG_COLOR 8'h01
 
 
@@ -42,7 +44,7 @@ module tt_um_emern_frontend (
 );
 
     // Stored polygon and screen data
-    reg [`WCOLOR:0] bg_color;
+    reg [`WCOLOR-1:0] bg_color;
     reg [`N_POLY-1:0] poly_en;
 
     // Polygon A
@@ -71,6 +73,15 @@ module tt_um_emern_frontend (
     reg [`WPY-1:0] poly_c_v0_y;
     reg [`WPY-1:0] poly_c_v1_y;
     reg [`WPY-1:0] poly_c_v2_y;
+
+    // Polygon D
+    reg [`WCOLOR-1:0] poly_d_color;
+    reg [`WPX-1:0] poly_d_v0_x;
+    reg [`WPX-1:0] poly_d_v1_x;
+    reg [`WPX-1:0] poly_d_v2_x;
+    reg [`WPY-1:0] poly_d_v0_y;
+    reg [`WPY-1:0] poly_d_v1_y;
+    reg [`WPY-1:0] poly_d_v2_y;
 
 
     // SPI data
@@ -208,6 +219,27 @@ module tt_um_emern_frontend (
                     poly_c_v2_y <= 0;
                     poly_en[2] <= 1'b0;
                 end
+                `SPI_CMD_WRITE_POLY_D: begin
+                    // Polygon D data comes as a packed struct
+                    poly_d_color <= spi_buf[13:8];
+                    poly_d_v0_x <= spi_buf[20:14];
+                    poly_d_v1_x <= spi_buf[27:21];
+                    poly_d_v2_x <= spi_buf[34:28];
+                    poly_d_v0_y <= spi_buf[40:35];
+                    poly_d_v1_y <= spi_buf[46:41];
+                    poly_d_v2_y <= spi_buf[52:47];
+                    poly_en[3] <= 1'b1;
+                end
+                `SPI_CMD_CLEAR_POLY_D: begin
+                    poly_d_color <= 0;
+                    poly_d_v0_x <= 0;
+                    poly_d_v1_x <= 0;
+                    poly_d_v2_x <= 0;
+                    poly_d_v0_y <= 0;
+                    poly_d_v1_y <= 0;
+                    poly_d_v2_y <= 0;
+                    poly_en[3] <= 1'b0;
+                end
                 `SPI_CMD_SET_BG_COLOR: begin
                     bg_color <= spi_buf[13:8];
                 end
@@ -221,13 +253,13 @@ module tt_um_emern_frontend (
 
     // Output assignment
     assign bg_color_out = bg_color;
-    assign poly_color_out = {poly_c_color, poly_b_color, poly_a_color};
-    assign v0_x_out = {poly_c_v0_x, poly_b_v0_x, poly_a_v0_x};
-    assign v0_y_out = {poly_c_v0_y, poly_b_v0_y, poly_a_v0_y};
-    assign v1_x_out = {poly_c_v1_x, poly_b_v1_x, poly_a_v1_x};
-    assign v1_y_out = {poly_c_v1_y, poly_b_v1_y, poly_a_v1_y};
-    assign v2_x_out = {poly_c_v2_x, poly_b_v2_x, poly_a_v2_x};
-    assign v2_y_out = {poly_c_v2_y, poly_b_v2_y, poly_a_v2_y};
+    assign poly_color_out = {poly_d_color, poly_c_color, poly_b_color, poly_a_color};
+    assign v0_x_out = {poly_d_v0_x, poly_c_v0_x, poly_b_v0_x, poly_a_v0_x};
+    assign v0_y_out = {poly_d_v0_y, poly_c_v0_y, poly_b_v0_y, poly_a_v0_y};
+    assign v1_x_out = {poly_d_v1_x, poly_c_v1_x, poly_b_v1_x, poly_a_v1_x};
+    assign v1_y_out = {poly_d_v1_y, poly_c_v1_y, poly_b_v1_y, poly_a_v1_y};
+    assign v2_x_out = {poly_d_v2_x, poly_c_v2_x, poly_b_v2_x, poly_a_v2_x};
+    assign v2_y_out = {poly_d_v2_y, poly_c_v2_y, poly_b_v2_y, poly_a_v2_y};
     assign poly_enable_out = poly_en;
 
 endmodule

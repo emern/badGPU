@@ -103,6 +103,29 @@ def set_polygon_c(dut, poly: PCPolygon):
         dut.en_c.value = 0
 
 
+def set_polygon_d(dut, poly: PCPolygon):
+    """
+    Set ploygon C rasterization params
+    """
+
+    # Set vertices
+    dut.v0_x_d.value = int(poly.v0[0] / 8)
+    dut.v0_y_d.value = int(poly.v0[1] / 8)
+    dut.v1_x_d.value = int(poly.v1[0] / 8)
+    dut.v1_y_d.value = int(poly.v1[1] / 8)
+    dut.v2_x_d.value = int(poly.v2[0] / 8)
+    dut.v2_y_d.value = int(poly.v2[1] / 8)
+
+    # Set color
+    dut.poly_color_d.value = poly.raw_color
+
+    # Enable rasterization
+    if poly.enable == True:
+        dut.en_d.value = 1
+    else:
+        dut.en_d.value = 0
+
+
 async def reset_dut(dut):
     """
     Reset DUT automatically
@@ -141,7 +164,7 @@ async def draw_screen(dut):
     return gen_arr
 
 
-def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, poly_c: PCPolygon, bg_color: int):
+def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, poly_c: PCPolygon, poly_d: PCPolygon, bg_color: int):
     """
     Ground truth generation of whole screen
     """
@@ -169,6 +192,12 @@ def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, poly_c: PCPolygon, bg_c
             else:
                 c = False
 
+            # Check poly D
+            if (poly_d.enable):
+                d = bool(should_pixel_be_rasterized(poly_d.v0, poly_d.v1, poly_d.v2, col, row))
+            else:
+                d = False
+
             # Find the "in front" polygon
             if (a == True):
                 # Polygon A takes "priority"
@@ -177,6 +206,8 @@ def draw_screen_gt(poly_a: PCPolygon, poly_b: PCPolygon, poly_c: PCPolygon, bg_c
                 gt_arr[row, col, :] = poly_b.color
             elif (c == True):
                 gt_arr[row, col, :] = poly_c.color
+            elif (d == True):
+                gt_arr[row, col, :] = poly_d.color
             else:
                 # Background color
                 gt_arr[row, col, :] = upscale_color(bg_color)
@@ -234,15 +265,21 @@ async def test_multi_polygons(dut):
                 color=COLOR_BLUE,
                 enable=True)
 
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=True)
 
     # Generate ground truth
-    gt_arr = draw_screen_gt(p_a, p_b, p_c, COLOR_BLACK)
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_BLACK)
 
     # Run DUT
     dut.background_color.value = COLOR_BLACK
     set_polygon_a(dut, p_a)
     set_polygon_b(dut, p_b)
     set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
     gen_arr = await draw_screen(dut)
 
     if environ['SAVE_IMGS'] == 'True':
@@ -293,14 +330,21 @@ async def test_empty_screen(dut):
                 color=COLOR_BLUE,
                 enable=False)
 
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=False)
+
     # Generate ground truth
-    gt_arr = draw_screen_gt(p_a, p_b, p_c, COLOR_RED)
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_RED)
 
     # Run DUT
     dut.background_color.value = COLOR_RED
     set_polygon_a(dut, p_a)
     set_polygon_b(dut, p_b)
     set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
     gen_arr = await draw_screen(dut)
 
     if environ['SAVE_IMGS'] == 'True':
@@ -351,14 +395,21 @@ async def test_polygon_a(dut):
                 color=COLOR_BLUE,
                 enable=False)
 
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=False)
+
     # Generate ground truth
-    gt_arr = draw_screen_gt(p_a, p_b, p_c, COLOR_BLACK)
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_BLACK)
 
     # Run DUT
     dut.background_color.value = COLOR_BLACK
     set_polygon_a(dut, p_a)
     set_polygon_b(dut, p_b)
-    set_polygon_b(dut, p_c)
+    set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
     gen_arr = await draw_screen(dut)
 
     if environ['SAVE_IMGS'] == 'True':
@@ -409,14 +460,21 @@ async def test_polygon_b(dut):
                 color=COLOR_BLUE,
                 enable=False)
 
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=False)
+
     # Generate ground truth
-    gt_arr = draw_screen_gt(p_a, p_b, p_c, COLOR_BLACK)
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_BLACK)
 
     # Run DUT
     dut.background_color.value = COLOR_BLACK
     set_polygon_a(dut, p_a)
     set_polygon_b(dut, p_b)
-    set_polygon_b(dut, p_c)
+    set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
     gen_arr = await draw_screen(dut)
 
     if environ['SAVE_IMGS'] == 'True':
@@ -429,7 +487,7 @@ async def test_polygon_b(dut):
     # Check error
     error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
     dut._log.info("Poly B test error is " + str(error))
-    if error > 0.2:
+    if error > 0.01:
         assert 1 == 0
 
     dut._log.info("Finished")
@@ -467,14 +525,21 @@ async def test_polygon_c(dut):
                 color=COLOR_BLUE,
                 enable=True)
 
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=False)
+
     # Generate ground truth
-    gt_arr = draw_screen_gt(p_a, p_b, p_c, COLOR_BLACK)
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_BLACK)
 
     # Run DUT
     dut.background_color.value = COLOR_BLACK
     set_polygon_a(dut, p_a)
     set_polygon_b(dut, p_b)
-    set_polygon_b(dut, p_c)
+    set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
     gen_arr = await draw_screen(dut)
 
     if environ['SAVE_IMGS'] == 'True':
@@ -491,3 +556,69 @@ async def test_polygon_c(dut):
         assert 1 == 0
 
     dut._log.info("Finished")
+
+
+@cocotb.test()
+async def test_polygon_d(dut):
+    """
+    Test polygon D only
+    """
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 40, units="ns")
+    cocotb.start_soon(clock.start())
+
+    # Reset
+    await reset_dut(dut)
+
+    # Polygon parameters
+    p_a = PCPolygon(v0=np.array([640, 200]),
+                v1=np.array([300, 480]),
+                v2=np.array([100, 100]),
+                color=COLOR_BLUE,
+                enable=False)
+
+    p_b = PCPolygon(v0=np.array([220, 20]),
+                v1=np.array([110, 300]),
+                v2=np.array([10, 30]),
+                color=COLOR_GREEN,
+                enable=False)
+
+    p_c = PCPolygon(v0=np.array([640, 400]),
+                v1=np.array([300, 480]),
+                v2=np.array([100, 0]),
+                color=COLOR_BLUE,
+                enable=False)
+
+    p_d = PCPolygon(v0=np.array([624, 400]),
+                v1=np.array([616, 488]),
+                v2=np.array([616, 400]),
+                color=COLOR_RED + COLOR_GREEN,
+                enable=True)
+
+    # Generate ground truth
+    gt_arr = draw_screen_gt(p_a, p_b, p_c, p_d, COLOR_BLACK)
+
+    # Run DUT
+    dut.background_color.value = COLOR_BLACK
+    set_polygon_a(dut, p_a)
+    set_polygon_b(dut, p_b)
+    set_polygon_c(dut, p_c)
+    set_polygon_d(dut, p_d)
+    gen_arr = await draw_screen(dut)
+
+    if environ['SAVE_IMGS'] == 'True':
+        gt_img = Image.fromarray(gt_arr, mode='RGB')
+        gt_img.save(SAVED_IMAGE_PATH + 'gt_poly_d_test.png')
+
+        gen_img = Image.fromarray(gen_arr, mode='RGB')
+        gen_img.save(SAVED_IMAGE_PATH + 'gen_poly_d_test.png')
+
+    # Check error
+    error = (np.absolute(gt_arr - gen_arr)  /  255).mean()
+    dut._log.info("Poly C test error is " + str(error))
+    if error > 0.2:
+        assert 1 == 0
+
+    dut._log.info("Finished")
+

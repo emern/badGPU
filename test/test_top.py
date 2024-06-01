@@ -11,7 +11,8 @@ from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge
 import shared_utils as shared
 from shared_utils import SPIcmd, send_spi_cmd, Polygon, upscale_color_from_components, should_pixel_be_rasterized, \
                                         upscale_color, COLOR_RED, COLOR_GREEN, COLOR_BLUE, SPI_CMD_WRITE_POLY_A, \
-                                        SPI_CMD_WRITE_POLY_B, SPI_CMD_CLEAR_POLY_A, SPI_CMD_CLEAR_POLY_B, SPI_CMD_WRITE_POLY_C, SPI_CMD_CLEAR_POLY_C
+                                        SPI_CMD_WRITE_POLY_B, SPI_CMD_CLEAR_POLY_A, SPI_CMD_CLEAR_POLY_B, SPI_CMD_WRITE_POLY_C, SPI_CMD_CLEAR_POLY_C, \
+                                        SPI_CMD_CLEAR_POLY_D, SPI_CMD_WRITE_POLY_D
 import numpy as np
 from PIL import Image
 from os import environ
@@ -37,6 +38,7 @@ class VGAScreen:
         self.poly_a = None
         self.poly_b = None
         self.poly_c = None
+        self.poly_d = None
         self.dut = dut
         self.clk_signal = clk_signal
         self.has_been_reset = False
@@ -124,6 +126,16 @@ class VGAScreen:
                     else:
                         c = False
 
+                    # Rasterize poly_d if required
+                    if self.poly_d != None:
+                        d = bool(should_pixel_be_rasterized(v0=self.poly_d.v0,
+                                                        v1=self.poly_d.v1,
+                                                        v2=self.poly_d.v2,
+                                                        p_x=self.pos_x,
+                                                        p_y=self.pos_y))
+                    else:
+                        d = False
+
                     # Find the "in front" polygon
                     if (a == True):
                         # Polygon A takes "priority"
@@ -132,6 +144,8 @@ class VGAScreen:
                         self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_b.color
                     elif (c == True):
                         self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_c.color
+                    elif (d == True):
+                        self.gt_buf[self.pos_y, self.pos_x, :] = self.poly_d.color
                     else:
                         # Background color
                         self.gt_buf[self.pos_y, self.pos_x, :] = self.background_color
@@ -185,6 +199,19 @@ class VGAScreen:
         await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
 
 
+    async def set_poly_d(self, poly: Polygon, save_poly=True):
+        """
+        Set polygon D params (if applicable), sends data over virtual spi bus
+        """
+
+        if save_poly == True:
+            self.poly_d = poly
+
+        # Generate and send command
+        new_cmd = SPIcmd.from_poly(poly=poly, cmd=SPI_CMD_WRITE_POLY_D)
+        await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
+
+
     async def clear_poly_a(self):
         """
         Clear Polygon A parameters, sends data over virtual spi bus
@@ -221,6 +248,19 @@ class VGAScreen:
 
         # Generate and send command
         new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_C, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0)
+        await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
+
+
+    async def clear_poly_d(self):
+        """
+        Clear Polygon D parameters, sends data over virtual spi bus
+
+        Note: This will fail if not sent during the vsync period!
+        """
+        self.poly_d = None
+
+        # Generate and send command
+        new_cmd = SPIcmd(cmd=SPI_CMD_CLEAR_POLY_D, color=0, v0_x=0, v1_x=0, v2_x=0, v0_y=0, v1_y=0, v2_y=0)
         await send_spi_cmd(cs_signal=self.dut.spi_cs, sck_signal=self.dut.spi_sck, mosi_signal=self.dut.spi_mosi, cmd=new_cmd)
 
 
@@ -321,7 +361,7 @@ async def test_draw_single_polygon_per_frame(dut):
 
     # Generate screen and start clock
     screen = VGAScreen(dut=dut, clk_signal=dut.clk)
-    cocotb.start_soon(screen.clock())
+    clk = cocotb.start_soon(screen.clock())
 
     # Reset device
     await reset_device(dut, screen=screen)
@@ -412,6 +452,33 @@ async def test_draw_single_polygon_per_frame(dut):
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
 
 
+    dut._log.info("Setting Polygon D")
+
+    p_d = Polygon(v0=[200, 20],
+                v1=[100, 120],
+                v2=[100, 20],
+                color=COLOR_BLUE+COLOR_RED)
+
+    # Set polygons internally
+    await screen.set_poly_d(poly=p_d)
+
+    # Fill in the rest of the screen blanking period
+    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
+
+    dut._log.info("Writing new frame")
+
+    # Generate the new frame with the polygon included
+    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
+
+    dut._log.info("Saving frame")
+
+    # Save new frame
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_4')
+
+    # Check gt vs generated to 1%
+    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
+
     dut._log.info("Clearing Polygon A")
 
     # Clear poly A
@@ -426,7 +493,7 @@ async def test_draw_single_polygon_per_frame(dut):
     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_4')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_5')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
@@ -446,12 +513,10 @@ async def test_draw_single_polygon_per_frame(dut):
     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_5')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_6')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
-
-    dut._log.info("Finished")
 
 
     dut._log.info("Clearing Polygon C")
@@ -468,7 +533,27 @@ async def test_draw_single_polygon_per_frame(dut):
     await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
 
     # Save new frame
-    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_6')
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_7')
+
+    # Check gt vs generated to 1%
+    check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
+
+
+    dut._log.info("Clearing Polygon D")
+
+    # Clear poly D
+    await screen.clear_poly_d()
+
+    # Fill in the rest of the screen blanking period
+    await Timer(calc_cycles((SCREEN_N_CYCLES) - (800 * screen.pos_y + screen.pos_x)), units='ns')
+
+    dut._log.info("Writing new frame")
+
+    # Generate the new visible frame
+    await Timer(calc_cycles(VISIBLE_N_CYCLES+1), units='ns')
+
+    # Save new frame
+    save_images(gt=screen.gt_buf, gen=screen.screen_buf, name='draw_single_poly_frame_8')
 
     # Check gt vs generated to 1%
     check_frame_error(dut, gt=screen.gt_buf, gen=screen.screen_buf, tolerance=0.01)
